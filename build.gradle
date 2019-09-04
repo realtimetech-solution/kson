@@ -4,9 +4,11 @@ plugins {
 
 repositories {
     jcenter()
+    maven { url "https://jitpack.io" } 
 }
 
 dependencies {
+    compile 'com.github.realtimetech-solution:kson:0.1'
 }
 
 jar {
