@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class KsonArray extends ArrayList<Object> implements KsonValue {
 
 	/**
-	 * �⺻ Serial UID
+	 * 기본 Serial UID
 	 */
 	private static final long serialVersionUID = 5513748119461105760L;
 	
