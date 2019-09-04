@@ -1,4 +1,4 @@
-package test;
+package com.realtimetech.kson.test;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
