@@ -13,6 +13,6 @@ dependencies {
 
 jar {
 	manifest {
-		attributes 'Main-Class': 'test.Main'
+		attributes 'Main-Class': 'com.realtimetech.kson.test.MainTest'
 	}
 }
