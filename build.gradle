@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+}
+
+jar {
+	manifest {
+		attributes 'Main-Class': 'test.Main'
+	}
+}
