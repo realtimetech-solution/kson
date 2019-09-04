@@ -3,7 +3,7 @@ package com.realtimetech.kson.test;
 import com.realtimetech.kson.KsonContext;
 import com.realtimetech.kson.element.KsonObject;
 
-public class TestCase {
+public class MainTest {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 		KsonContext ksonContext = new KsonContext();
