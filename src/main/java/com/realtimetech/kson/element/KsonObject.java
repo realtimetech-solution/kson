@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class KsonObject extends HashMap<Object, Object> implements KsonValue {
 
 	/**
-	 * �⺻ Serial UID
+	 * 기본 Serial UID
 	 */
 	private static final long serialVersionUID = -6357620110797218097L;
 	
