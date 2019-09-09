@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.realtimetech.kson.reflection.ArrayUtils;
+import com.realtimetech.reflection.access.ArrayAccessor;
 
 public class TestObject {
 	private Test test;
@@ -62,8 +62,8 @@ public class TestObject {
 
 				if (originalLength == targetLength) {
 					for (int index = 0; index < originalLength; index++) {
-						Object originalElementObject = ArrayUtils.get(originalObject, index);
-						Object targetElementObject = ArrayUtils.get(targetObject, index);
+						Object originalElementObject = ArrayAccessor.get(originalObject, index);
+						Object targetElementObject = ArrayAccessor.get(targetObject, index);
 
 						if (originalElementObject.getClass() != targetElementObject.getClass()) {
 							return false;
