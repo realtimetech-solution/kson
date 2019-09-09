@@ -14,11 +14,11 @@ import com.realtimetech.kson.element.KsonArray;
 import com.realtimetech.kson.element.KsonObject;
 import com.realtimetech.kson.element.KsonValue;
 import com.realtimetech.kson.primary.PrimaryKey;
-import com.realtimetech.kson.reflection.ArrayUtils;
-import com.realtimetech.kson.reflection.UnsafeAllocator;
 import com.realtimetech.kson.stack.FastStack;
 import com.realtimetech.kson.string.StringMaker;
 import com.realtimetech.kson.transform.Transformer;
+import com.realtimetech.reflection.access.ArrayAccessor;
+import com.realtimetech.reflection.allocate.UnsafeAllocator;
 
 @SuppressWarnings("unchecked")
 public class KsonContext {
@@ -34,7 +34,6 @@ public class KsonContext {
 	// for object
 	private FastStack<Object> objectStack;
 	private FastStack<KsonValue> ksonStack;
-	private UnsafeAllocator unsafeAllocator;
 
 	private HashMap<Class<?>, Transformer<?>> registeredTransformers;
 
@@ -51,8 +50,6 @@ public class KsonContext {
 		this.stringMaker = new StringMaker(100);
 
 		this.objectStack = new FastStack<Object>();
-		this.ksonStack = new FastStack<KsonValue>();
-		this.unsafeAllocator = UnsafeAllocator.create();
 
 		this.registeredTransformers = new HashMap<Class<? extends Object>, Transformer<? extends Object>>();
 
@@ -273,7 +270,7 @@ public class KsonContext {
 							arrayComponentType = targetObjectClass;
 						}
 
-						ArrayUtils.set(targetObject, index, createAtToObject(false, arrayComponentType, ksonValue.get(index)));
+						ArrayAccessor.set(targetObject, index, createAtToObject(false, arrayComponentType, ksonValue.get(index)));
 					}
 				}
 			}
@@ -330,7 +327,7 @@ public class KsonContext {
 				convertedValue = Array.newInstance(componentType, ksonArray.size());
 			} else if (convertedValue instanceof KsonObject) {
 				if (primaryId == null) {
-					convertedValue = this.unsafeAllocator.newInstance(type);
+					convertedValue = UnsafeAllocator.newInstance(type);
 				} else {
 					if (!this.primaryObjects.containsKey(type)) {
 						this.primaryObjects.put(type, new HashMap<Object, Object>());
@@ -339,7 +336,7 @@ public class KsonContext {
 					HashMap<Object, Object> hashMap = this.primaryObjects.get(type);
 
 					if (!hashMap.containsKey(primaryId)) {
-						hashMap.put(primaryId, this.unsafeAllocator.newInstance(type));
+						hashMap.put(primaryId, UnsafeAllocator.newInstance(type));
 					}
 
 					convertedValue = hashMap.get(primaryId);
@@ -393,7 +390,7 @@ public class KsonContext {
 							arrayComponentType = targetObject.getClass();
 						}
 
-						ksonValue.add(this.createAtFromObject(false, arrayComponentType, ArrayUtils.get(targetObject, index)));
+						ksonValue.add(this.createAtFromObject(false, arrayComponentType, ArrayAccessor.get(targetObject, index)));
 					}
 				}
 			}
