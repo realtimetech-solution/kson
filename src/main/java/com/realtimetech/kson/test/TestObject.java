@@ -14,7 +14,12 @@ public class TestObject {
 	private Test test;
 
 	private Test[] testArray;
+
 	private int[] intArray;
+	private String[] stringArray;
+
+	private int integer;
+	private String string;
 
 	private TestInterfaceImpl testInterfaceImpl;
 	private TestAbstractImpl testAbstractImpl;
@@ -126,7 +131,12 @@ public class TestObject {
 		this.test = test;
 
 		this.testArray = new Test[] { test, test };
+
 		this.intArray = new int[] { 1, 2, 3, 4 };
+		this.integer = 1;
+
+		this.stringArray = new String[] { "A", "B", "C" };
+		this.string = "ABC";
 
 		this.testInterfaceImpl = new TestInterfaceImpl();
 		this.testAbstractImpl = new TestAbstractImpl();
@@ -247,6 +257,18 @@ public class TestObject {
 
 	public int[] getIntArray() {
 		return intArray;
+	}
+
+	public int getInteger() {
+		return integer;
+	}
+
+	public String[] getStringArray() {
+		return stringArray;
+	}
+
+	public String getString() {
+		return string;
 	}
 
 	public Test[] getTestArray() {
