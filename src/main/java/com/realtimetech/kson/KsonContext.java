@@ -50,6 +50,7 @@ public class KsonContext {
 		this.stringMaker = new StringMaker(100);
 
 		this.objectStack = new FastStack<Object>();
+		this.ksonStack = new FastStack<KsonValue>();
 
 		this.registeredTransformers = new HashMap<Class<? extends Object>, Transformer<? extends Object>>();
 

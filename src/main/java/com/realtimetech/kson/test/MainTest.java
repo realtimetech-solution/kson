@@ -8,6 +8,7 @@ public class MainTest {
 	public static void main(String[] args) throws Exception {
 		KsonContext ksonContext = new KsonContext();
 
+		
 		{
 			String fieldTest;
 
