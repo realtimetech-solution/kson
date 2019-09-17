@@ -8,10 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.realtimetech.kson.annotation.ExceptionField;
 import com.realtimetech.reflection.access.ArrayAccessor;
 
 public class TestObject {
 	private Test test;
+
+	@ExceptionField
+	private byte[] bytes;
 
 	private Test[] testArray;
 
@@ -48,11 +52,13 @@ public class TestObject {
 
 	public String validationObject(TestObject collectObject) throws IllegalArgumentException, IllegalAccessException {
 		for (Field field : collectObject.getClass().getDeclaredFields()) {
-			Object originalObject = field.get(this);
-			Object targetObject = field.get(collectObject);
+			if (!field.isAnnotationPresent(ExceptionField.class)) {
+				Object originalObject = field.get(this);
+				Object targetObject = field.get(collectObject);
 
-			if (!validation(originalObject, targetObject)) {
-				return field.getName();
+				if (!validation(originalObject, targetObject)) {
+					return field.getName();
+				}
 			}
 		}
 
@@ -143,6 +149,13 @@ public class TestObject {
 
 		this.testInterface = new TestInterfaceImpl();
 		this.testAbstract = new TestAbstractImpl();
+
+		this.bytes = new byte[255];
+		{
+			for (byte i = -128; i < Byte.MAX_VALUE; i++) {
+				this.bytes[i + 128] = i;
+			}
+		}
 
 		this.testInterfaceImplArray = new TestInterfaceImpl[2];
 		{
@@ -241,14 +254,6 @@ public class TestObject {
 				this.mapMap.put(keyMap, valueMap);
 			}
 		}
-
-		// this.maps = new HashMap[2];
-//	
-//		this.maps[0] = new HashMap<String, String>();
-//		this.maps[1] = new HashMap<String, String>();
-//		
-//		this.maps[0].put("Hello", "Hi");
-//		this.maps[1].put("Hello", "Hi");
 	}
 
 	public Test getTest() {

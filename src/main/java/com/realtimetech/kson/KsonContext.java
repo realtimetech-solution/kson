@@ -10,10 +10,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.realtimetech.kson.annotation.ExceptionField;
+import com.realtimetech.kson.annotation.PrimaryKeyField;
 import com.realtimetech.kson.element.KsonArray;
 import com.realtimetech.kson.element.KsonObject;
 import com.realtimetech.kson.element.KsonValue;
-import com.realtimetech.kson.primary.PrimaryKey;
 import com.realtimetech.kson.stack.FastStack;
 import com.realtimetech.kson.string.StringMaker;
 import com.realtimetech.kson.transform.Transformer;
@@ -153,7 +154,7 @@ public class KsonContext {
 				if (clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) {
 					Field[] superFields = getAccessibleFields(clazz.getSuperclass());
 					for (Field superField : superFields) {
-						if (!fields.contains(superField)) {
+						if (!fields.contains(superField) && !superField.isAnnotationPresent(ExceptionField.class)) {
 							fields.add(superField);
 						}
 					}
@@ -161,7 +162,7 @@ public class KsonContext {
 
 				for (Field field : clazz.getDeclaredFields()) {
 					field.setAccessible(true);
-					if (!fields.contains(field)) {
+					if (!fields.contains(field) && !field.isAnnotationPresent(ExceptionField.class)) {
 						fields.add(field);
 					}
 				}
@@ -223,7 +224,7 @@ public class KsonContext {
 			boolean matched = false;
 
 			for (Field field : this.getAccessibleFields(type)) {
-				if (field.isAnnotationPresent(PrimaryKey.class)) {
+				if (field.isAnnotationPresent(PrimaryKeyField.class)) {
 					this.primaryKeys.put(type, field);
 					matched = true;
 					break;
@@ -567,7 +568,7 @@ public class KsonContext {
 						this.stringMaker.add(currentChar);
 					}
 				} else if (currentMode == ValueMode.NUMBER) {
-					if (!(currentChar >= '0' && currentChar <= '9') && currentChar != '-' && currentChar != 'D' && currentChar != 'd' && currentChar != 'F' && currentChar != 'f' && currentChar != 'L' && currentChar != 'l' && currentChar != '.') {
+					if (!(currentChar >= '0' && currentChar <= '9') && currentChar != '-' && currentChar != 'D' && currentChar != 'd' && currentChar != 'F' && currentChar != 'f' && currentChar != 'L' && currentChar != 'l' && currentChar != 'B' && currentChar != 'b' && currentChar != '.') {
 						modeStack.pop();
 
 						char last = this.stringMaker.last();
@@ -587,6 +588,11 @@ public class KsonContext {
 						case 'L':
 							this.stringMaker.remove();
 							this.valueStack.push(Long.parseLong(this.stringMaker.toString()));
+							break;
+						case 'b':
+						case 'B':
+							this.stringMaker.remove();
+							this.valueStack.push(Byte.parseByte(this.stringMaker.toString()));
 							break;
 						default:
 							if (decimal) {

@@ -64,6 +64,8 @@ public interface KsonValue {
 					return object + "D";
 				} else if (object instanceof Long) {
 					return object + "L";
+				} else if (object instanceof Byte) {
+					return object + "B";
 				} else {
 					return object.toString();
 				}
