@@ -10,8 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.realtimetech.kson.annotation.ExceptionField;
-import com.realtimetech.kson.annotation.PrimaryKeyField;
+import com.realtimetech.kson.annotation.Ignore;
+import com.realtimetech.kson.annotation.PrimaryKey;
 import com.realtimetech.kson.element.KsonArray;
 import com.realtimetech.kson.element.KsonObject;
 import com.realtimetech.kson.element.KsonValue;
@@ -41,6 +41,7 @@ public class KsonContext {
 	private HashMap<Class<?>, Transformer<?>> transformers;
 
 	private HashMap<Class<?>, Field> primaryKeys;
+
 	private HashMap<Class<?>, HashMap<Object, Object>> primaryObjects;
 
 	private HashMap<Class<?>, Field[]> cachedFields;
@@ -154,7 +155,7 @@ public class KsonContext {
 				if (clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) {
 					Field[] superFields = getAccessibleFields(clazz.getSuperclass());
 					for (Field superField : superFields) {
-						if (!fields.contains(superField) && !superField.isAnnotationPresent(ExceptionField.class)) {
+						if (!fields.contains(superField) && !superField.isAnnotationPresent(Ignore.class)) {
 							fields.add(superField);
 						}
 					}
@@ -162,7 +163,7 @@ public class KsonContext {
 
 				for (Field field : clazz.getDeclaredFields()) {
 					field.setAccessible(true);
-					if (!fields.contains(field) && !field.isAnnotationPresent(ExceptionField.class)) {
+					if (!fields.contains(field) && !field.isAnnotationPresent(Ignore.class)) {
 						fields.add(field);
 					}
 				}
@@ -224,7 +225,7 @@ public class KsonContext {
 			boolean matched = false;
 
 			for (Field field : this.getAccessibleFields(type)) {
-				if (field.isAnnotationPresent(PrimaryKeyField.class)) {
+				if (field.isAnnotationPresent(PrimaryKey.class)) {
 					this.primaryKeys.put(type, field);
 					matched = true;
 					break;
