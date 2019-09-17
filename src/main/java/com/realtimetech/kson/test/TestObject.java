@@ -8,13 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.realtimetech.kson.annotation.ExceptionField;
+import com.realtimetech.kson.annotation.Ignore;
 import com.realtimetech.reflection.access.ArrayAccessor;
 
 public class TestObject {
 	private Test test;
 
-	@ExceptionField
+	@Ignore
 	private byte[] bytes;
 
 	private Test[] testArray;
@@ -52,7 +52,7 @@ public class TestObject {
 
 	public String validationObject(TestObject collectObject) throws IllegalArgumentException, IllegalAccessException {
 		for (Field field : collectObject.getClass().getDeclaredFields()) {
-			if (!field.isAnnotationPresent(ExceptionField.class)) {
+			if (!field.isAnnotationPresent(Ignore.class)) {
 				Object originalObject = field.get(this);
 				Object targetObject = field.get(collectObject);
 
