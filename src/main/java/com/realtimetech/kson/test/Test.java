@@ -2,10 +2,10 @@ package com.realtimetech.kson.test;
 
 import java.util.Random;
 
-import com.realtimetech.kson.primary.PrimaryKey;
+import com.realtimetech.kson.annotation.PrimaryKeyField;
 
 public class Test {
-	@PrimaryKey
+	@PrimaryKeyField
 	private int id;
 
 	private int value1;

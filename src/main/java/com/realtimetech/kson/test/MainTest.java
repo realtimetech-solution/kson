@@ -8,7 +8,6 @@ public class MainTest {
 	public static void main(String[] args) throws Exception {
 		KsonContext ksonContext = new KsonContext();
 
-		
 		{
 			String fieldTest;
 
@@ -73,8 +72,7 @@ public class MainTest {
 			Long startTime = System.currentTimeMillis();
 			for (int i = 0; i < 10000; i++) {
 				KsonObject fromObject = (KsonObject) ksonContext.fromObject(collectObject);
-				TestObject good = ksonContext.toObject(TestObject.class,
-						ksonContext.fromString(fromObject.toJsonString()));
+				TestObject good = ksonContext.toObject(TestObject.class, ksonContext.fromString(fromObject.toKsonString()));
 				KsonObject toObject = (KsonObject) ksonContext.fromObject(good);
 			}
 			Long endTime = System.currentTimeMillis();
