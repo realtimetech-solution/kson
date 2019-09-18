@@ -1,12 +1,11 @@
 package com.realtimetech.kson.test;
 
-import java.io.IOException;
-
 import com.realtimetech.kson.KsonContext;
 import com.realtimetech.kson.builder.KsonBuilder;
 import com.realtimetech.kson.element.KsonObject;
 import com.realtimetech.kson.element.KsonValue;
-import com.realtimetech.kson.pool.KsonPool;
+import com.realtimetech.kson.exception.SerializeException;
+import com.realtimetech.kson.util.pool.KsonPool;
 
 public class MainTest {
 	@SuppressWarnings("unused")
@@ -27,7 +26,7 @@ public class MainTest {
 					for (int i = 0; i < 100000; i++) {
 						try {
 							KsonValue fromObject = ksonContext.fromObject(testObject);
-						} catch (IllegalArgumentException | IllegalAccessException | IOException e) {
+						} catch (SerializeException e) {
 							e.printStackTrace();
 						}
 					}

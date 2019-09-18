@@ -1,4 +1,4 @@
-package com.realtimetech.kson.stack;
+package com.realtimetech.kson.util.stack;
 
 import java.util.EmptyStackException;
 
