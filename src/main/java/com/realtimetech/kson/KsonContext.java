@@ -15,8 +15,10 @@ import com.realtimetech.kson.annotation.PrimaryKey;
 import com.realtimetech.kson.element.KsonArray;
 import com.realtimetech.kson.element.KsonObject;
 import com.realtimetech.kson.element.KsonValue;
-import com.realtimetech.kson.stack.FastStack;
-import com.realtimetech.kson.string.StringMaker;
+import com.realtimetech.kson.exception.DeserializeException;
+import com.realtimetech.kson.exception.SerializeException;
+import com.realtimetech.kson.util.stack.FastStack;
+import com.realtimetech.kson.util.string.StringMaker;
 import com.realtimetech.kson.transform.Transformer;
 import com.realtimetech.reflection.access.ArrayAccessor;
 import com.realtimetech.reflection.allocate.UnsafeAllocator;
@@ -66,7 +68,6 @@ public class KsonContext {
 		this.primaryObjects = new HashMap<Class<?>, HashMap<Object, Object>>();
 
 		this.cachedFields = new HashMap<Class<?>, Field[]>();
-		
 
 		this.registeredTransformers.put(Date.class, new Transformer<Date>() {
 			@Override
@@ -88,7 +89,7 @@ public class KsonContext {
 				for (Object object : value) {
 					try {
 						ksonArray.add(ksonContext.addFromObjectStack(object));
-					} catch (IllegalArgumentException | IllegalAccessException | IOException e) {
+					} catch (SerializeException e) {
 						e.printStackTrace();
 					}
 				}
@@ -121,10 +122,10 @@ public class KsonContext {
 					Object valueObject = value.get(keyObject);
 
 					try {
-						Object tryFromObject = ksonContext.addFromObjectStack(keyObject);
-						Object tryFromObject2 = ksonContext.addFromObjectStack(valueObject);
-						ksonObject.put(tryFromObject, tryFromObject2);
-					} catch (IllegalArgumentException | IllegalAccessException | IOException e) {
+						Object keyKson = ksonContext.addFromObjectStack(keyObject);
+						Object valueKson = ksonContext.addFromObjectStack(valueObject);
+						ksonObject.put(keyKson, valueKson);
+					} catch (SerializeException e) {
 						e.printStackTrace();
 					}
 				}
@@ -196,14 +197,6 @@ public class KsonContext {
 		return true;
 	}
 
-	public <T> T toObject(Class<T> clazz, Object object) throws Exception {
-		if (object instanceof KsonValue) {
-			return (T) this.addToObjectStack(clazz, (KsonValue) object);
-		}
-
-		return (T) object;
-	}
-
 	public Transformer<?> getTransformer(Class<?> type) {
 		if (!this.transformers.containsKey(type)) {
 			boolean matched = false;
@@ -246,11 +239,19 @@ public class KsonContext {
 		return this.primaryKeys.get(type);
 	}
 
-	public Object addToObjectStack(Object object) throws Exception {
+	public <T> T toObject(Class<T> clazz, Object object) throws DeserializeException {
+		if (object instanceof KsonValue) {
+			return (T) this.addToObjectStack(clazz, (KsonValue) object);
+		}
+
+		return (T) object;
+	}
+
+	public Object addToObjectStack(Object object) throws DeserializeException {
 		return this.addToObjectStack(Object.class, object);
 	}
 
-	public Object addToObjectStack(Class<?> clazz, Object object) throws Exception {
+	public Object addToObjectStack(Class<?> clazz, Object object) throws DeserializeException {
 		boolean needLoop = this.objectStack.isEmpty();
 
 		Object result = this.createAtToObject(true, clazz, object);
@@ -266,7 +267,11 @@ public class KsonContext {
 					KsonObject ksonValue = (KsonObject) targetKson;
 
 					for (Field field : this.getAccessibleFields(targetObjectClass)) {
-						field.set(targetObject, createAtToObject(false, field.getType(), ksonValue.get(field.getName())));
+						try {
+							field.set(targetObject, createAtToObject(false, field.getType(), ksonValue.get(field.getName())));
+						} catch (IllegalArgumentException | IllegalAccessException e) {
+							throw new DeserializeException("Deserialize failed because can't access the field.");
+						}
 					}
 				} else {
 					KsonArray ksonValue = (KsonArray) targetKson;
@@ -291,14 +296,18 @@ public class KsonContext {
 		return result;
 	}
 
-	private Object createAtToObject(boolean first, Class<?> type, Object originalValue) throws Exception {
+	private Object createAtToObject(boolean first, Class<?> type, Object originalValue) throws DeserializeException {
 		Object primaryId = null;
 
 		if (originalValue instanceof KsonObject) {
 			KsonObject wrappingObject = (KsonObject) originalValue;
 
 			if (wrappingObject.containsKey("#class")) {
-				type = Class.forName(wrappingObject.get("#class").toString());
+				try {
+					type = Class.forName(wrappingObject.get("#class").toString());
+				} catch (ClassNotFoundException e) {
+					throw new DeserializeException("Deserialize failed because can't find target class.");
+				}
 				originalValue = wrappingObject.get("#data");
 			} else if (wrappingObject.containsKey("@id")) {
 				primaryId = wrappingObject.get("@id");
@@ -336,7 +345,11 @@ public class KsonContext {
 				convertedValue = Array.newInstance(componentType, ksonArray.size());
 			} else if (convertedValue instanceof KsonObject) {
 				if (primaryId == null) {
-					convertedValue = UnsafeAllocator.newInstance(type);
+					try {
+						convertedValue = UnsafeAllocator.newInstance(type);
+					} catch (Exception e) {
+						throw new DeserializeException("Deserialize failed because can't allocation object.");
+					}
 				} else {
 					if (!this.primaryObjects.containsKey(type)) {
 						this.primaryObjects.put(type, new HashMap<Object, Object>());
@@ -345,7 +358,11 @@ public class KsonContext {
 					HashMap<Object, Object> hashMap = this.primaryObjects.get(type);
 
 					if (!hashMap.containsKey(primaryId)) {
-						hashMap.put(primaryId, UnsafeAllocator.newInstance(type));
+						try {
+							hashMap.put(primaryId, UnsafeAllocator.newInstance(type));
+						} catch (Exception e) {
+							throw new DeserializeException("Deserialize failed because can't allocation primary object.");
+						}
 					}
 
 					convertedValue = hashMap.get(primaryId);
@@ -362,15 +379,15 @@ public class KsonContext {
 		return convertedValue;
 	}
 
-	public KsonValue fromObject(Object object) throws IOException, IllegalArgumentException, IllegalAccessException {
+	public KsonValue fromObject(Object object) throws SerializeException {
 		if (this.objectStack.isEmpty()) {
 			return (KsonValue) addFromObjectStack(object);
 		} else {
-			throw new IllegalAccessException("This context already running parse!");
+			throw new SerializeException("This context already running serialize!");
 		}
 	}
 
-	public Object addFromObjectStack(Object object) throws IOException, IllegalArgumentException, IllegalAccessException {
+	public Object addFromObjectStack(Object object) throws SerializeException {
 		boolean needLoop = this.objectStack.isEmpty();
 
 		Object result = null;
@@ -386,7 +403,11 @@ public class KsonContext {
 					KsonObject ksonValue = (KsonObject) targetKson;
 
 					for (Field field : this.getAccessibleFields(targetObject.getClass())) {
-						ksonValue.put(field.getName(), this.createAtFromObject(false, field.getType(), field.get(targetObject)));
+						try {
+							ksonValue.put(field.getName(), this.createAtFromObject(false, field.getType(), field.get(targetObject)));
+						} catch (IllegalArgumentException | IllegalAccessException e) {
+							throw new SerializeException("Serialize failed because object could can't get from field.");
+						}
 					}
 				} else {
 					KsonArray ksonValue = (KsonArray) targetKson;
@@ -413,7 +434,7 @@ public class KsonContext {
 		return result;
 	}
 
-	private Object createAtFromObject(boolean first, Class<?> type, Object originalValue) {
+	private Object createAtFromObject(boolean first, Class<?> type, Object originalValue) throws SerializeException {
 		if (originalValue == null)
 			return null;
 
@@ -429,15 +450,15 @@ public class KsonContext {
 			Field primaryKeyField = getPrimaryKeyField(originalValueType);
 
 			if (primaryKeyField != null) {
+				KsonObject wrappingObject = new KsonObject();
+
 				try {
-					KsonObject wrappingObject = new KsonObject();
-
 					wrappingObject.put("@id", primaryKeyField.get(originalValue));
-
-					originalValue = wrappingObject;
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
+					throw new SerializeException("Serialize failed because primary key can't get from field.");
 				}
+
+				originalValue = wrappingObject;
 			}
 		}
 

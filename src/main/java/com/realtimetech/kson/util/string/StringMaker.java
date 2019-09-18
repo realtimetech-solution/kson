@@ -1,4 +1,4 @@
-package com.realtimetech.kson.string;
+package com.realtimetech.kson.util.string;
 
 public class StringMaker {
 	private int raiseSize;
