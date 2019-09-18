@@ -1,12 +1,49 @@
 package com.realtimetech.kson.test;
 
+import java.io.IOException;
+
 import com.realtimetech.kson.KsonContext;
+import com.realtimetech.kson.builder.KsonBuilder;
 import com.realtimetech.kson.element.KsonObject;
+import com.realtimetech.kson.element.KsonValue;
+import com.realtimetech.kson.pool.KsonPool;
 
 public class MainTest {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
-		KsonContext ksonContext = new KsonContext();
+		KsonBuilder ksonBuilder = new KsonBuilder();
+		final KsonPool ksonPool = new KsonPool(ksonBuilder);
+
+		System.out.println("## Thread Starting");
+		Thread[] threads = new Thread[5];
+		for (int i = 0; i < 5; i++) {
+			threads[i] = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					TestObject testObject = new TestObject(new Test(1234, "Yallo"));
+					KsonContext ksonContext = ksonPool.get();
+
+					System.out.println("   Context Start: " + ksonContext);
+					for (int i = 0; i < 100000; i++) {
+						try {
+							KsonValue fromObject = ksonContext.fromObject(testObject);
+						} catch (IllegalArgumentException | IllegalAccessException | IOException e) {
+							e.printStackTrace();
+						}
+					}
+					System.out.println("   Context Done: " + ksonContext);
+				}
+			});
+			
+			threads[i].start();
+			Thread.sleep(1000);
+		}
+
+		for (int i = 0; i < 5; i++) {
+			threads[i].join();
+		}
+		
+		KsonContext ksonContext = ksonBuilder.build();
 
 		{
 			String fieldTest;
