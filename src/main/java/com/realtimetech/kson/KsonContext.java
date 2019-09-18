@@ -47,12 +47,16 @@ public class KsonContext {
 	private HashMap<Class<?>, Field[]> cachedFields;
 
 	public KsonContext() {
-		this.valueStack = new FastStack<Object>();
-		this.modeStack = new FastStack<ValueMode>();
-		this.stringMaker = new StringMaker(100);
+		this(10, 100);
+	}
 
-		this.objectStack = new FastStack<Object>();
-		this.ksonStack = new FastStack<KsonValue>();
+	public KsonContext(int stackSize, int stringBufferSize) {
+		this.valueStack = new FastStack<Object>(stackSize);
+		this.modeStack = new FastStack<ValueMode>(stackSize);
+		this.stringMaker = new StringMaker(stringBufferSize);
+
+		this.objectStack = new FastStack<Object>(stackSize);
+		this.ksonStack = new FastStack<KsonValue>(stackSize);
 
 		this.registeredTransformers = new HashMap<Class<? extends Object>, Transformer<? extends Object>>();
 
@@ -62,6 +66,7 @@ public class KsonContext {
 		this.primaryObjects = new HashMap<Class<?>, HashMap<Object, Object>>();
 
 		this.cachedFields = new HashMap<Class<?>, Field[]>();
+		
 
 		this.registeredTransformers.put(Date.class, new Transformer<Date>() {
 			@Override
@@ -145,6 +150,7 @@ public class KsonContext {
 				return hashMap;
 			}
 		});
+
 	}
 
 	private Field[] getAccessibleFields(Class<?> clazz) {
