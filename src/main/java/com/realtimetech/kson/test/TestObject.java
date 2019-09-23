@@ -15,6 +15,9 @@ import com.realtimetech.reflection.access.ArrayAccessor;
 public class TestObject {
 	private Test test;
 
+	private TestEnum enumType1;
+	private TestEnum enumType2;
+	
 	@Ignore
 	private byte[] bytes;
 
@@ -142,6 +145,9 @@ public class TestObject {
 
 		this.testArray = new Test[] { test, test };
 
+		this.enumType1 = TestEnum.TYPE_1;
+		this.enumType2 = TestEnum.TYPE_2;
+		
 		this.intArray = new int[] { 1, 2, 3, 4 };
 		this.integer = 1;
 
@@ -364,5 +370,25 @@ public class TestObject {
 
 	public HashMap<String, String> getStringMap() {
 		return stringMap;
+	}
+	
+	public byte[] getBytes() {
+		return bytes;
+	}
+	
+	public LinkedList<Double> getDoubleLinkedList() {
+		return doubleLinkedList;
+	}
+	
+	public List<Double> getDoubleList() {
+		return doubleList;
+	}
+	
+	public TestEnum getEnumType1() {
+		return enumType1;
+	}
+	
+	public TestEnum getEnumType2() {
+		return enumType2;
 	}
 }
