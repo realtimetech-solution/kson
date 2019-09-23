@@ -3,13 +3,12 @@ package com.realtimetech.kson;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.realtimetech.kson.annotation.Ignore;
 import com.realtimetech.kson.annotation.PrimaryKey;
@@ -167,6 +166,18 @@ public class KsonContext {
 			}
 		});
 
+		this.registerTransformer(UUID.class, new Transformer<UUID>() {
+			@Override
+			public Object serialize(KsonContext ksonContext, UUID value) {
+				return value.toString();
+			}
+
+			@Override
+			public UUID deserialize(KsonContext ksonContext, Class<?> object, Object value) {
+				return UUID.fromString((String) value);
+			}
+		});
+
 	}
 
 	private Field[] getAccessibleFields(Class<?> clazz) {
@@ -312,9 +323,14 @@ public class KsonContext {
 		return result;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private Object createAtToObject(boolean first, Class<?> type, Object originalValue) throws DeserializeException {
 		Object primaryId = null;
 
+		if(type.isEnum()) 
+			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
+		
+		
 		if (originalValue instanceof KsonObject) {
 			KsonObject wrappingObject = (KsonObject) originalValue;
 
@@ -419,7 +435,6 @@ public class KsonContext {
 
 				if (targetKson instanceof KsonObject) {
 					KsonObject ksonValue = (KsonObject) targetKson;
-
 					for (Field field : this.getAccessibleFields(targetObject.getClass())) {
 						try {
 							ksonValue.put(field.getName(), this.createAtFromObject(false, field.getType(), field.get(targetObject)));
@@ -455,6 +470,9 @@ public class KsonContext {
 	private Object createAtFromObject(boolean first, Class<?> type, Object originalValue) throws SerializeException {
 		if (originalValue == null)
 			return null;
+		
+		if(originalValue.getClass().isEnum())
+			return originalValue.toString();
 
 		Class<? extends Object> originalValueType = originalValue.getClass();
 
