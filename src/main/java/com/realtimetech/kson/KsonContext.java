@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -76,14 +77,14 @@ public class KsonContext {
 			}
 
 			@Override
-			public Date deserialize(KsonContext ksonContext, Object value) {
+			public Date deserialize(KsonContext ksonContext, Class<?> fieldType, Object value) {
 				return new Date((Long) value);
 			}
 		});
 
-		this.registeredTransformers.put(List.class, new Transformer<ArrayList<?>>() {
+		this.registeredTransformers.put(Collection.class, new Transformer<Collection<?>>() {
 			@Override
-			public Object serialize(KsonContext ksonContext, ArrayList<?> value) {
+			public Object serialize(KsonContext ksonContext, Collection<?> value) {
 				KsonArray ksonArray = new KsonArray();
 
 				for (Object object : value) {
@@ -97,25 +98,32 @@ public class KsonContext {
 				return ksonArray;
 			}
 
+			@SuppressWarnings("deprecation")
 			@Override
-			public ArrayList<?> deserialize(KsonContext ksonContext, Object value) {
-				ArrayList<Object> list = new ArrayList<Object>();
+			public Collection<?> deserialize(KsonContext ksonContext, Class<?> fieldType, Object value) {
+				Collection<Object> collections = null;
+
+				try {
+					collections = (Collection<Object>) fieldType.newInstance();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 
 				for (Object object : (KsonArray) value) {
 					try {
-						list.add(ksonContext.addToObjectStack(object.getClass(), object));
+						collections.add(ksonContext.addToObjectStack(object.getClass(), object));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 
-				return list;
+				return collections;
 			}
 		});
 
-		this.registeredTransformers.put(Map.class, new Transformer<HashMap<?, ?>>() {
+		this.registeredTransformers.put(Map.class, new Transformer<Map<?, ?>>() {
 			@Override
-			public Object serialize(KsonContext ksonContext, HashMap<?, ?> value) {
+			public Object serialize(KsonContext ksonContext, Map<?, ?> value) {
 				KsonObject ksonObject = new KsonObject();
 
 				for (Object keyObject : value.keySet()) {
@@ -133,22 +141,29 @@ public class KsonContext {
 				return ksonObject;
 			}
 
+			@SuppressWarnings("deprecation")
 			@Override
-			public HashMap<?, ?> deserialize(KsonContext ksonContext, Object value) {
-				HashMap<Object, Object> hashMap = new HashMap<Object, Object>();
+			public Map<?, ?> deserialize(KsonContext ksonContext, Class<?> fieldType, Object value) {
+				Map<Object, Object> map = null;
+
+				try {
+					map = (Map<Object, Object>) fieldType.newInstance();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 
 				KsonObject ksonObject = (KsonObject) value;
 				for (Object keyObject : ksonObject.keySet()) {
 					Object valueObject = ksonObject.get(keyObject);
 
 					try {
-						hashMap.put(ksonContext.addToObjectStack(keyObject.getClass(), keyObject), ksonContext.addToObjectStack(valueObject.getClass(), valueObject));
+						map.put(ksonContext.addToObjectStack(keyObject.getClass(), keyObject), ksonContext.addToObjectStack(valueObject.getClass(), valueObject));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 
-				return hashMap;
+				return map;
 			}
 		});
 
@@ -270,6 +285,7 @@ public class KsonContext {
 						try {
 							field.set(targetObject, createAtToObject(false, field.getType(), ksonValue.get(field.getName())));
 						} catch (IllegalArgumentException | IllegalAccessException e) {
+							e.printStackTrace();
 							throw new DeserializeException("Deserialize failed because can't access the field.");
 						}
 					}
@@ -324,8 +340,10 @@ public class KsonContext {
 			Transformer<Object> transformer = (Transformer<Object>) this.getTransformer(type);
 
 			if (transformer != null) {
+				Class<?> realType = type;
+
 				type = originalValue.getClass();
-				originalValue = transformer.deserialize(this, originalValue);
+				originalValue = transformer.deserialize(this, realType, originalValue);
 			}
 		}
 
