@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +46,9 @@ public class TestObject {
 
 	private ArrayList<Date> dateArrayList;
 	private List<Date> dateList;
+
+	private LinkedList<Double> doubleLinkedList;
+	private List<Double> doubleList;
 
 	private HashMap<String, String> stringMap;
 	private HashMap<String, Date> dateMap;
@@ -233,6 +237,20 @@ public class TestObject {
 			this.dateMap.put("B", new Date());
 		}
 
+		this.doubleLinkedList = new LinkedList<Double>();
+		{
+			this.doubleLinkedList.add(0d);
+			this.doubleLinkedList.add(1d);
+			this.doubleLinkedList.add(2d);
+		}
+
+		this.doubleList = new LinkedList<Double>();
+		{
+			this.doubleList.add(0d);
+			this.doubleList.add(1d);
+			this.doubleList.add(2d);
+		}
+		
 		this.mapMap = new HashMap<HashMap<String, String>, HashMap<String, String>>();
 		{
 			{
