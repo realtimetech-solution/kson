@@ -3,6 +3,7 @@ package com.realtimetech.kson;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -196,7 +197,7 @@ public class KsonContext {
 
 				for (Field field : clazz.getDeclaredFields()) {
 					field.setAccessible(true);
-					if (!fields.contains(field) && !field.isAnnotationPresent(Ignore.class)) {
+					if (!fields.contains(field) && !field.isAnnotationPresent(Ignore.class) && !Modifier.isStatic(field.getModifiers())) {
 						fields.add(field);
 					}
 				}
