@@ -38,6 +38,7 @@ public class KsonContext {
 	// for object
 	private FastStack<Object> objectStack;
 	private FastStack<KsonValue> ksonStack;
+	private boolean working;
 
 	private HashMap<Class<?>, Transformer<?>> registeredTransformers;
 
@@ -54,6 +55,7 @@ public class KsonContext {
 	}
 
 	public KsonContext(int stackSize, int stringBufferSize) {
+		this.working = false;
 		this.valueStack = new FastStack<Object>(stackSize);
 		this.modeStack = new FastStack<ValueMode>(stackSize);
 		this.stringMaker = new StringMaker(stringBufferSize);
@@ -279,11 +281,10 @@ public class KsonContext {
 	}
 
 	public Object addToObjectStack(Class<?> clazz, Object object) throws DeserializeException {
-		boolean needLoop = this.objectStack.isEmpty();
-
 		Object result = this.createAtToObject(true, clazz, object);
 
-		if (needLoop) {
+		if (!this.working) {
+			this.working = true;
 			while (!this.objectStack.isEmpty()) {
 				Object targetObject = this.objectStack.pop();
 				KsonValue targetKson = this.ksonStack.pop();
@@ -316,7 +317,7 @@ public class KsonContext {
 					}
 				}
 			}
-
+			this.working = false;
 			this.objectStack.reset();
 			this.ksonStack.reset();
 		}
@@ -405,7 +406,7 @@ public class KsonContext {
 				}
 			}
 
-			if (useStack) {
+			if (useStack && convertedValue != null) {
 				this.ksonStack.push((KsonValue) originalValue);
 				this.objectStack.push(convertedValue);
 			}
@@ -415,7 +416,7 @@ public class KsonContext {
 	}
 
 	public KsonValue fromObject(Object object) throws SerializeException {
-		if (this.objectStack.isEmpty()) {
+		if (!this.working) {
 			return (KsonValue) addFromObjectStack(object);
 		} else {
 			throw new SerializeException("This context already running serialize!");
@@ -423,11 +424,10 @@ public class KsonContext {
 	}
 
 	public Object addFromObjectStack(Object object) throws SerializeException {
-		boolean needLoop = this.objectStack.isEmpty();
-
 		Object result = null;
 
-		if (needLoop) {
+		if (!this.working) {
+			this.working = true;
 			result = this.createAtFromObject(true, object.getClass(), object);
 
 			while (!this.objectStack.isEmpty()) {
@@ -461,6 +461,7 @@ public class KsonContext {
 
 			this.objectStack.reset();
 			this.ksonStack.reset();
+			this.working = false;
 		} else {
 			result = this.createAtFromObject(false, Object.class, object);
 		}
