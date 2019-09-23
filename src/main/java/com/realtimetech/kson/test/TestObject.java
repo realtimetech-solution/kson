@@ -53,6 +53,8 @@ public class TestObject {
 	private LinkedList<Double> doubleLinkedList;
 	private List<Double> doubleList;
 
+	private LinkedList<TestSingle> testSingleList;
+
 	private HashMap<String, String> stringMap;
 	private HashMap<String, Date> dateMap;
 	private HashMap<HashMap<String, String>, HashMap<String, String>> mapMap;
@@ -255,6 +257,13 @@ public class TestObject {
 			this.doubleList.add(0d);
 			this.doubleList.add(1d);
 			this.doubleList.add(2d);
+		}
+		
+		this.testSingleList = new LinkedList<TestSingle>();
+		{
+			this.testSingleList.add(new TestSingle());
+			this.testSingleList.add(new TestSingle());
+			this.testSingleList.add(new TestSingle());
 		}
 		
 		this.mapMap = new HashMap<HashMap<String, String>, HashMap<String, String>>();
