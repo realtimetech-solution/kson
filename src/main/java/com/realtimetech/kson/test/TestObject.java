@@ -17,7 +17,9 @@ public class TestObject {
 
 	private TestEnum enumType1;
 	private TestEnum enumType2;
-	
+
+	private String[] emptyArray;
+
 	@Ignore
 	private byte[] bytes;
 
@@ -149,10 +151,11 @@ public class TestObject {
 
 		this.enumType1 = TestEnum.TYPE_1;
 		this.enumType2 = TestEnum.TYPE_2;
-		
+
 		this.intArray = new int[] { 1, 2, 3, 4 };
 		this.integer = 1;
 
+		this.emptyArray = new String[0];
 		this.stringArray = new String[] { "A", "B", "C" };
 		this.string = "ABC";
 
@@ -258,14 +261,14 @@ public class TestObject {
 			this.doubleList.add(1d);
 			this.doubleList.add(2d);
 		}
-		
+
 		this.testSingleList = new LinkedList<TestSingle>();
 		{
 			this.testSingleList.add(new TestSingle());
 			this.testSingleList.add(new TestSingle());
 			this.testSingleList.add(new TestSingle());
 		}
-		
+
 		this.mapMap = new HashMap<HashMap<String, String>, HashMap<String, String>>();
 		{
 			{
@@ -299,6 +302,10 @@ public class TestObject {
 
 	public int getInteger() {
 		return integer;
+	}
+
+	public String[] getEmptyArray() {
+		return emptyArray;
 	}
 
 	public String[] getStringArray() {
@@ -380,23 +387,23 @@ public class TestObject {
 	public HashMap<String, String> getStringMap() {
 		return stringMap;
 	}
-	
+
 	public byte[] getBytes() {
 		return bytes;
 	}
-	
+
 	public LinkedList<Double> getDoubleLinkedList() {
 		return doubleLinkedList;
 	}
-	
+
 	public List<Double> getDoubleList() {
 		return doubleList;
 	}
-	
+
 	public TestEnum getEnumType1() {
 		return enumType1;
 	}
-	
+
 	public TestEnum getEnumType2() {
 		return enumType2;
 	}
