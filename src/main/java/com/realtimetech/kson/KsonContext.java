@@ -1,9 +1,11 @@
 package com.realtimetech.kson;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,7 +73,31 @@ public class KsonContext {
 		this.primaryObjects = new HashMap<Class<?>, HashMap<Object, Object>>();
 
 		this.cachedFields = new HashMap<Class<?>, Field[]>();
+		
+		this.registerTransformer(Charset.class, new Transformer<Charset>() {
+			@Override
+			public Object serialize(KsonContext ksonContext, Charset value) {
+				return value.toString();
+			}
 
+			@Override
+			public Charset deserialize(KsonContext ksonContext, Class<?> object, Object value) {
+				return Charset.forName(value.toString());
+			}
+		});
+		
+		this.registerTransformer(File.class, new Transformer<File>() {
+			@Override
+			public Object serialize(KsonContext ksonContext, File value) {
+				return value.getAbsolutePath();
+			}
+
+			@Override
+			public File deserialize(KsonContext ksonContext, Class<?> object, Object value) {
+				return new File(value.toString());
+			}
+		});
+		
 		this.registeredTransformers.put(Date.class, new Transformer<Date>() {
 			@Override
 			public Object serialize(KsonContext ksonContext, Date value) {
