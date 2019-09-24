@@ -355,9 +355,11 @@ public class KsonContext {
 	private Object createAtToObject(boolean first, Class<?> type, Object originalValue) throws DeserializeException {
 		Object primaryId = null;
 
+		if(originalValue == null)
+			return null; 
+		
 		if(type.isEnum()) 
 			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
-		
 		
 		if (originalValue instanceof KsonObject) {
 			KsonObject wrappingObject = (KsonObject) originalValue;
