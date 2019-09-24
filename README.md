@@ -4,9 +4,24 @@
 ## 1. Kson란?
 
 Kson은 Json 표준을 호환하는 새로운 데이터 포맷입니다, 기존 Json의 모호한 정수 타입 문제를 해결한 구현체로서 아래와 같은 데이터 형태를 지원합니다.
->{"longValue": 100l, "floatValue": 100.2f, "doubleValue": 100.2d, "automaticInteger": 20, "automaticDecimal": 10.1}
+>{
+>   "longValueLower"    : 100l,
+>   "floatValueLower"   : 100.2f,
+>   "doubleValueLower"  : 100.2d,
 
->{"longValue": 100L, "floatValue": 100.2F, "doubleValue": 100.2D, {"A": "B"}: "Now, we can use key like object", \["A"\]: "Also Array"}
+>   "longValueUpper"    : 100L,
+>   "floatValueUpper"   : 100.2F,
+>   "doubleValueUpper"  : 100.2D,
+
+>   "automaticInteger"  : 20,
+>   "automaticDecimal"  : 10.1
+
+>   {
+>     "A": "B"
+>   } : "Now, you can use object like key!",
+
+>   ["A", "B"] : "And, array!"
+>}
 
 이외 데이터는 Json 표준과 호환됩니다.
 
