@@ -584,10 +584,12 @@ public class KsonContext {
 								}
 							} else if (currentMode == ValueMode.ARRAY) {
 								if (currentChar == ',' || currentChar == ']') {
-									Object value = valueStack.pop();
+									if (lastValidChar != '[') {
+										Object value = valueStack.pop();
 
-									KsonArray ksonArray = (KsonArray) valueStack.peek();
-									ksonArray.add(value);
+										KsonArray ksonArray = (KsonArray) valueStack.peek();
+										ksonArray.add(value);
+									}
 
 									if (currentChar == ']') {
 										modeStack.pop();
