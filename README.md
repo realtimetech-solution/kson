@@ -1,3 +1,5 @@
+[English](README_EN.md) | [Korean](README.md)
+
 # Kson
 > 이 프로젝트는 (주)리얼타임테크 솔루션 2팀에서 개발된 라이브러리입니다.
 
@@ -27,8 +29,6 @@ Kson은 Json 표준을 호환하는 새로운 데이터 포맷입니다, 기존 
 이외 데이터는 Json 표준과 호환됩니다.
 
 또한, Kson은 강력한 Object Serializer와 Deserializer를 가지고 있습니다. (Gson대비 190% 빠름) 이는, KsonPool를 통해 Thread-Safe한 Pooling을 지원합니다.
-
-자세한 내용은 KsonContext 클래스를 참조해주세요.
 
 ## 2. 사용법
 
