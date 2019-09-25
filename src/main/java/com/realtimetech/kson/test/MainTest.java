@@ -67,14 +67,14 @@ public class MainTest {
 			System.out.println("## Seconds Converting");
 			System.out.println();
 
-			TestObject testObject2 = ksonContext.toObject(TestObject.class, testObjectKsonObject1);
+			TestObject testObject2 = ksonContext.toObject(TestObject.class, testObjectKsonObject1.toJsonString());
 			System.out.print("   Validation late works............... ");
 			if ((fieldTest = testObject2.validationObject(testObject1)) != null) {
 				System.out.println("OK!");
 			} else {
 				System.out.println("FAIL.");
 			}
-			Test test2 = ksonContext.toObject(Test.class, testKsonObject1);
+			Test test2 = ksonContext.toObject(Test.class, testKsonObject1.toKsonString());
 
 			System.out.print("   Validation two object............... ");
 			if ((fieldTest = testObject2.validationObject(testObject1)) == null) {
@@ -108,7 +108,7 @@ public class MainTest {
 			Long startTime = System.currentTimeMillis();
 			for (int i = 0; i < 10000; i++) {
 				KsonObject fromObject = (KsonObject) ksonContext.fromObject(collectObject);
-				TestObject good = ksonContext.toObject(TestObject.class, ksonContext.fromString(fromObject.toKsonString()));
+				TestObject good = ksonContext.toObject(TestObject.class, fromObject);
 				KsonObject toObject = (KsonObject) ksonContext.fromObject(good);
 			}
 			Long endTime = System.currentTimeMillis();

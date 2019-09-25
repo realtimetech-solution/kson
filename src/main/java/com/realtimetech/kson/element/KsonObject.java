@@ -23,10 +23,14 @@ public class KsonObject extends HashMap<Object, Object> implements KsonValue {
 
 			if (firstElement) {
 				firstElement = false;
-				stringBuffer.append(this.toString(key, useKsonStandard) + ": " + this.toString(value, useKsonStandard));
+				stringBuffer.append(this.toString(key, useKsonStandard));
+				stringBuffer.append(": ");
+				stringBuffer.append(this.toString(value, useKsonStandard));
 			} else {
 				stringBuffer.append(", ");
-				stringBuffer.append(this.toString(key, useKsonStandard) + ": " + this.toString(value, useKsonStandard));
+				stringBuffer.append(this.toString(key, useKsonStandard));
+				stringBuffer.append(": ");
+				stringBuffer.append(this.toString(value, useKsonStandard));
 			}
 		}
 		stringBuffer.append("}");

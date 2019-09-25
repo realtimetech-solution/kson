@@ -52,6 +52,8 @@ public class KsonContext {
 
 	private HashMap<Class<?>, Field[]> cachedFields;
 
+	private HashMap<String, Class<?>> cachedClasses;
+	
 	public KsonContext() {
 		this(10, 100);
 	}
@@ -74,6 +76,8 @@ public class KsonContext {
 
 		this.cachedFields = new HashMap<Class<?>, Field[]>();
 		
+		this.cachedClasses = new HashMap<String, Class<?>>();
+
 		this.registerTransformer(Charset.class, new Transformer<Charset>() {
 			@Override
 			public Object serialize(KsonContext ksonContext, Charset value) {
@@ -85,7 +89,7 @@ public class KsonContext {
 				return Charset.forName(value.toString());
 			}
 		});
-		
+
 		this.registerTransformer(File.class, new Transformer<File>() {
 			@Override
 			public Object serialize(KsonContext ksonContext, File value) {
@@ -97,7 +101,7 @@ public class KsonContext {
 				return new File(value.toString());
 			}
 		});
-		
+
 		this.registeredTransformers.put(Date.class, new Transformer<Date>() {
 			@Override
 			public Object serialize(KsonContext ksonContext, Date value) {
@@ -209,6 +213,14 @@ public class KsonContext {
 
 	}
 
+	private Class<?> getClassByName(String name) throws ClassNotFoundException {
+		if(!this.cachedClasses.containsKey(name)) {
+			this.cachedClasses.put(name, Class.forName(name));
+		}
+		
+		return this.cachedClasses.get(name);
+	}
+	
 	private Field[] getAccessibleFields(Class<?> clazz) {
 		if (!this.cachedFields.containsKey(clazz)) {
 			LinkedList<Field> fields = new LinkedList<Field>();
@@ -294,6 +306,42 @@ public class KsonContext {
 		return this.primaryKeys.get(type);
 	}
 
+	private Object castToType(Class<?> type, Object object) {
+		if (object instanceof Number) {
+			Number number = (Number) object;
+
+			if (type == Integer.class || type == int.class) {
+				return number.intValue();
+			}
+
+			if (type == Double.class || type == double.class) {
+				return number.doubleValue();
+			}
+
+			if (type == Float.class || type == float.class) {
+				return number.floatValue();
+			}
+
+			if (type == Byte.class || type == byte.class) {
+				return number.byteValue();
+			}
+
+			if (type == Long.class || type == long.class) {
+				return number.longValue();
+			}
+
+			if (type == Short.class || type == short.class) {
+				return number.shortValue();
+			}
+		}
+
+		try {
+			return type.cast(object);
+		} catch (ClassCastException e) {
+			return object;
+		}
+	}
+
 	public <T> T toObject(Class<T> clazz, Object object) throws DeserializeException {
 		if (object instanceof String) {
 			try {
@@ -302,7 +350,7 @@ public class KsonContext {
 
 			}
 		}
-		
+
 		if (object instanceof KsonValue) {
 			return (T) this.addToObjectStack(clazz, (KsonValue) object);
 		}
@@ -330,7 +378,13 @@ public class KsonContext {
 
 					for (Field field : this.getAccessibleFields(targetObjectClass)) {
 						try {
-							field.set(targetObject, createAtToObject(false, field.getType(), ksonValue.get(field.getName())));
+							Object createAtToObject = createAtToObject(false, field.getType(), ksonValue.get(field.getName()));
+
+							if (createAtToObject.getClass() != field.getType()) {
+								createAtToObject = castToType(field.getType(), createAtToObject);
+							}
+
+							field.set(targetObject, createAtToObject);
 						} catch (IllegalArgumentException | IllegalAccessException e) {
 							e.printStackTrace();
 							throw new DeserializeException("Deserialize failed because can't access the field.");
@@ -347,7 +401,13 @@ public class KsonContext {
 							arrayComponentType = targetObjectClass;
 						}
 
-						ArrayAccessor.set(targetObject, index, createAtToObject(false, arrayComponentType, ksonValue.get(index)));
+						Object createAtToObject = createAtToObject(false, arrayComponentType, ksonValue.get(index));
+
+						if (createAtToObject.getClass() != arrayComponentType) {
+							createAtToObject = castToType(arrayComponentType, createAtToObject);
+						}
+
+						ArrayAccessor.set(targetObject, index, createAtToObject);
 					}
 				}
 			}
@@ -363,18 +423,18 @@ public class KsonContext {
 	private Object createAtToObject(boolean first, Class<?> type, Object originalValue) throws DeserializeException {
 		Object primaryId = null;
 
-		if(originalValue == null)
-			return null; 
-		
-		if(type.isEnum()) 
+		if (originalValue == null)
+			return null;
+
+		if (type.isEnum())
 			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
-		
+
 		if (originalValue instanceof KsonObject) {
 			KsonObject wrappingObject = (KsonObject) originalValue;
 
 			if (wrappingObject.containsKey("#class")) {
 				try {
-					type = Class.forName(wrappingObject.get("#class").toString());
+					type = this.getClassByName(wrappingObject.get("#class").toString());
 				} catch (ClassNotFoundException e) {
 					throw new DeserializeException("Deserialize failed because can't find target class.");
 				}
@@ -508,8 +568,8 @@ public class KsonContext {
 	private Object createAtFromObject(boolean first, Class<?> type, Object originalValue) throws SerializeException {
 		if (originalValue == null)
 			return null;
-		
-		if(originalValue.getClass().isEnum())
+
+		if (originalValue.getClass().isEnum())
 			return originalValue.toString();
 
 		Class<? extends Object> originalValueType = originalValue.getClass();

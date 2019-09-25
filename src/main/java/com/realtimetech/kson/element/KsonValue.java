@@ -1,6 +1,10 @@
 package com.realtimetech.kson.element;
 
+import com.realtimetech.kson.util.string.StringMaker;
+
 public interface KsonValue {
+	StringMaker stringMaker = new StringMaker();
+	
 	default public String toKsonString() {
 		return toString(true);
 	}
@@ -13,37 +17,45 @@ public interface KsonValue {
 		if (string == null) {
 			return null;
 		}
+		stringMaker.reset();
 		
-		StringBuffer stringBuffer = new StringBuffer();
 		for (int i = 0; i < string.length(); i++) {
 			char character = string.charAt(i);
 			switch (character) {
 			case '"':
-				stringBuffer.append("\\\"");
+				stringMaker.add('\\');
+				stringMaker.add('\"');
 				break;
 			case '\\':
-				stringBuffer.append("\\\\");
+				stringMaker.add('\\');
+				stringMaker.add('\\');
 				break;
 			case '\b':
-				stringBuffer.append("\\b");
+				stringMaker.add('\\');
+				stringMaker.add('b');
 				break;
 			case '\f':
-				stringBuffer.append("\\f");
+				stringMaker.add('\\');
+				stringMaker.add('f');
 				break;
 			case '\n':
-				stringBuffer.append("\\n");
+				stringMaker.add('\\');
+				stringMaker.add('n');
 				break;
 			case '\r':
-				stringBuffer.append("\\r");
+				stringMaker.add('\\');
+				stringMaker.add('r');
 				break;
 			case '\t':
-				stringBuffer.append("\\t");
+				stringMaker.add('\\');
+				stringMaker.add('t');
 				break;
 			default:
-				stringBuffer.append(character);
+				stringMaker.add(character);
 			}
 		}
-		return stringBuffer.toString();
+		
+		return stringMaker.toString();
 	}
 
 	default public String toString(Object object, boolean useKsonStandard) {
