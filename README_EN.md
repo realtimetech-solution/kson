@@ -1,4 +1,9 @@
-[English](README_EN.md) | [Korean](README.md)
+<p align="right">
+  <b>Languages</b><br>
+  <a href="README.md">Korean</a> |
+  <a href="README_EN.md">English</a>
+</p>
+
 
 # Kson
 > This project is a library developed by REALTIMETECH Solution Division 2.
