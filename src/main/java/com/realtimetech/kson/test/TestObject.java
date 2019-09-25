@@ -61,6 +61,8 @@ public class TestObject {
 	private HashMap<String, Date> dateMap;
 	private HashMap<HashMap<String, String>, HashMap<String, String>> mapMap;
 
+	private Double doubleValue;
+	
 	public String validationObject(TestObject collectObject) throws IllegalArgumentException, IllegalAccessException {
 		for (Field field : collectObject.getClass().getDeclaredFields()) {
 			if (!field.isAnnotationPresent(Ignore.class)) {
@@ -255,6 +257,8 @@ public class TestObject {
 			this.doubleLinkedList.add(2d);
 		}
 
+		this.doubleValue = 0d;
+		
 		this.doubleList = new LinkedList<Double>();
 		{
 			this.doubleList.add(0d);
@@ -290,6 +294,10 @@ public class TestObject {
 				this.mapMap.put(keyMap, valueMap);
 			}
 		}
+	}
+	
+	public Double getDoubleValue() {
+		return doubleValue;
 	}
 
 	public Test getTest() {
