@@ -1,3 +1,5 @@
+[English](README_EN.md) | [Korean](README.md)
+
 # Kson
 > This project is a library developed by REALTIMETECH Solution Division 2.
 
