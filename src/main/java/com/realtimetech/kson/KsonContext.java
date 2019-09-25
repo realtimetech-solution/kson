@@ -295,6 +295,14 @@ public class KsonContext {
 	}
 
 	public <T> T toObject(Class<T> clazz, Object object) throws DeserializeException {
+		if (object instanceof String) {
+			try {
+				object = this.fromString((String) object);
+			} catch (IOException e) {
+
+			}
+		}
+		
 		if (object instanceof KsonValue) {
 			return (T) this.addToObjectStack(clazz, (KsonValue) object);
 		}
