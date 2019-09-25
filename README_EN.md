@@ -3,7 +3,7 @@
 
 ## 1. What is Kson?
 
-Kson is a new data format compatible with the Json standards. It solves the ambiguos number type problem of Json and supports the following data types.
+Kson is a new data format compatible with the Json standards. It solves the ambiguous number type problem of Json and supports the following data types.
 ```
 {
    "longValueLower"    : 100l,
@@ -63,7 +63,7 @@ dependencies {
 
 #### 2.1.3. Jar
 ```
-Please reger to the releases part of this repository.
+Please refer to the releases part of this repository.
 ```
 
 ### 2.2. Usage
