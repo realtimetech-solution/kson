@@ -13,7 +13,7 @@
 >      모호한 숫자 데이터를 명시하고, Dict의 Key로서 Array와 Dict를 이용해보세요!
 >
 >- #### 자동 Interface 및 Abstract Class 필드 기록 (Optional)
->      Object Serialize, Deserialize 단계의 문제인 Interface, Abstract Class 형태의 필드를 마음껏 이용하세요!.
+>      Object Serialize, Deserialize 단계의 문제인 Interface, Abstract Class 형태의 필드를 마음껏 이용하세요!
 >
 >- #### Primary Object 설정 기능 (Optional)
 >      여러 객체에서 반복적으로 포함하는 Object를 Primary Key를 지정해서 하나로 묶어보세요! 
