@@ -10,7 +10,27 @@
 
 ## 1. What is Kson?
 
+### 1.1. Key Function
+
+>
+>- #### 190% Faster then Gson
+>      Experience faster Object Serialize, Deserialize, and Json Parse!
+>
+>- #### Supported extended Number, Key Types (Optional)
+>      Specify ambiguous numeric data, and use Array and Dict as Dict's Key!
+>
+>- #### Automatically serialize Interface / Abstract Class field (Optional)
+>      Don't worry about the fields in interface, Abstract Class! (List or Map)
+>
+>- #### Make Primary Object (Optional)
+>      Manage Objects included in multiple objects as one by specifying Primary Key!
+>
+
+
+### 1.2. Data Example
+
 Kson is a new data format compatible with the Json standards. It solves the ambiguous number type problem of Json and supports the following data types.
+
 ```
 {
    "longValueLower"    : 100l,
@@ -31,9 +51,6 @@ Kson is a new data format compatible with the Json standards. It solves the ambi
    ["A", "B"] : "And, array!"
 }
 ```
-The other data is compatible with the Json standards.
-
-In addition, Kson has a powerful Object Serializer and Deserializer (190% faster than Gson). Moreover, it supports Thread-Safe Pooling through KsonPool.
 
 ## 2. Usage
 
