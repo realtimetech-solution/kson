@@ -23,7 +23,7 @@ public class KsonArray extends ArrayList<Object> implements KsonValue {
 				firstElement = false;
 				stringBuffer.append(this.toString(object, useKsonStandard));
 			} else {
-				stringBuffer.append(", ");
+				stringBuffer.append(",");
 				stringBuffer.append(this.toString(object, useKsonStandard));
 			}
 		}

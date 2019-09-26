@@ -42,6 +42,8 @@ public class KsonContext {
 	private FastStack<KsonValue> ksonStack;
 	private boolean working;
 
+	private boolean useCustomTag;
+
 	private HashMap<Class<?>, Transformer<?>> registeredTransformers;
 
 	private HashMap<Class<?>, Transformer<?>> transformers;
@@ -53,7 +55,7 @@ public class KsonContext {
 	private HashMap<Class<?>, Field[]> cachedFields;
 
 	private HashMap<String, Class<?>> cachedClasses;
-	
+
 	public KsonContext() {
 		this(10, 100);
 	}
@@ -67,6 +69,8 @@ public class KsonContext {
 		this.objectStack = new FastStack<Object>(stackSize);
 		this.ksonStack = new FastStack<KsonValue>(stackSize);
 
+		this.useCustomTag = true;
+
 		this.registeredTransformers = new HashMap<Class<? extends Object>, Transformer<? extends Object>>();
 
 		this.transformers = new HashMap<Class<? extends Object>, Transformer<? extends Object>>();
@@ -75,7 +79,7 @@ public class KsonContext {
 		this.primaryObjects = new HashMap<Class<?>, HashMap<Object, Object>>();
 
 		this.cachedFields = new HashMap<Class<?>, Field[]>();
-		
+
 		this.cachedClasses = new HashMap<String, Class<?>>();
 
 		this.registerTransformer(Charset.class, new Transformer<Charset>() {
@@ -214,13 +218,13 @@ public class KsonContext {
 	}
 
 	private Class<?> getClassByName(String name) throws ClassNotFoundException {
-		if(!this.cachedClasses.containsKey(name)) {
+		if (!this.cachedClasses.containsKey(name)) {
 			this.cachedClasses.put(name, Class.forName(name));
 		}
-		
+
 		return this.cachedClasses.get(name);
 	}
-	
+
 	private Field[] getAccessibleFields(Class<?> clazz) {
 		if (!this.cachedFields.containsKey(clazz)) {
 			LinkedList<Field> fields = new LinkedList<Field>();
@@ -251,6 +255,14 @@ public class KsonContext {
 
 	public void registerTransformer(Class<?> clazz, Transformer<?> preTransformer) {
 		this.registeredTransformers.put(clazz, preTransformer);
+	}
+
+	public void setUseCustomTag(boolean useCustomTag) {
+		this.useCustomTag = useCustomTag;
+	}
+
+	public boolean isUseCustomTag() {
+		return useCustomTag;
 	}
 
 	private static final Class<?>[] SERIALIZE_WHITE_LIST = new Class[] { KsonObject.class, KsonArray.class, boolean.class, Boolean.class, int.class, Integer.class, double.class, Double.class, float.class, Float.class, long.class, Long.class, byte.class, Byte.class, short.class, Short.class, String.class };
@@ -580,7 +592,7 @@ public class KsonContext {
 			originalValue = transformer.serialize(this, originalValue);
 		}
 
-		if (!first) {
+		if (!first && this.useCustomTag) {
 			Field primaryKeyField = getPrimaryKeyField(originalValueType);
 
 			if (primaryKeyField != null) {
@@ -609,7 +621,7 @@ public class KsonContext {
 			this.ksonStack.push((KsonValue) convertedKsonValue);
 		}
 
-		if (this.isNeedSerialize(originalValueType) && type != originalValueType) {
+		if (this.isNeedSerialize(originalValueType) && type != originalValueType && this.useCustomTag) {
 			KsonObject wrappingObject = new KsonObject();
 
 			wrappingObject.put("#class", originalValueType.getName());
@@ -634,8 +646,8 @@ public class KsonContext {
 		boolean decimal = false;
 		char lastValidChar = ' ';
 		try {
+			ValueMode currentMode = modeStack.peek();
 			while (pointer <= length - 1) {
-				ValueMode currentMode = modeStack.peek();
 				char currentChar = charArray[pointer];
 
 				if (currentMode == ValueMode.NONE || currentMode == ValueMode.OBJECT || currentMode == ValueMode.ARRAY) {
@@ -643,14 +655,18 @@ public class KsonContext {
 						if (currentChar == '{') {
 							valueStack.push(new KsonObject());
 							modeStack.push(ValueMode.OBJECT);
+							currentMode = modeStack.peek();
 						} else if (currentChar == '[') {
 							valueStack.push(new KsonArray());
 							modeStack.push(ValueMode.ARRAY);
+							currentMode = modeStack.peek();
 						} else if (currentChar == '\"') {
 							modeStack.push(ValueMode.STRING);
+							currentMode = modeStack.peek();
 							this.stringMaker.reset();
 						} else if ((currentChar >= '0' && currentChar <= '9') || currentChar == '-') {
 							modeStack.push(ValueMode.NUMBER);
+							currentMode = modeStack.peek();
 							decimal = false;
 							this.stringMaker.reset();
 							pointer--;
@@ -676,6 +692,7 @@ public class KsonContext {
 
 									if (currentChar == '}') {
 										modeStack.pop();
+										currentMode = modeStack.peek();
 									}
 								}
 							} else if (currentMode == ValueMode.ARRAY) {
@@ -689,6 +706,7 @@ public class KsonContext {
 
 									if (currentChar == ']') {
 										modeStack.pop();
+										currentMode = modeStack.peek();
 									}
 								}
 							}
@@ -728,12 +746,14 @@ public class KsonContext {
 					} else if (currentChar == '\"') {
 						valueStack.push(new String(this.stringMaker.toString()));
 						modeStack.pop();
+						currentMode = modeStack.peek();
 					} else {
 						this.stringMaker.add(currentChar);
 					}
 				} else if (currentMode == ValueMode.NUMBER) {
 					if (!(currentChar >= '0' && currentChar <= '9') && currentChar != '-' && currentChar != 'D' && currentChar != 'd' && currentChar != 'F' && currentChar != 'f' && currentChar != 'L' && currentChar != 'l' && currentChar != 'B' && currentChar != 'b' && currentChar != '.') {
 						modeStack.pop();
+						currentMode = modeStack.peek();
 
 						char last = this.stringMaker.last();
 
