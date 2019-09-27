@@ -120,7 +120,7 @@ KsonContext ksonContext = ksonPool.get();
 KsonContext ksonContext = new KsonContext();
 
 String jsonString = "{...}";
-JsonValue JsonValue = ksonContext.fromString(jsonString);
+JsonValue jsonValue = ksonContext.fromString(jsonString);
 ```
 
 #### 2.2.3. JsonValue to String
@@ -135,7 +135,7 @@ String ksonString = JsonValue.toKsonString(); //확장된 Kson 포맷을 이용�
 KsonContext ksonContext = new KsonContext();
 
 Person personObject = someObject;
-JsonValue JsonValue = ksonContext.fromObject(personObject);
+JsonValue jsonValue = ksonContext.fromObject(personObject);
 ```
 
 #### 2.2.5. JsonValue to Object
