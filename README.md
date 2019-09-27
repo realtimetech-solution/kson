@@ -8,14 +8,14 @@
   <a href="https://github.com/realtimetech-solution/kson"><img width="400px" alt="Kson Logo" src="resources/logo_tiny.png" style="max-width: 100%;"></a>
 </h1>
 <p align="center" style="max-width: 100%;">
-  <img src="https://img.shields.io/github/license/realtimetech-solution/kson"/>
-  <img src="https://img.shields.io/github/languages/code-size/realtimetech-solution/kson"/>
-  <img src="https://img.shields.io/github/downloads/realtimetech-solution/kson/total"/>
-  <img src="https://img.shields.io/github/issues/realtimetech-solution/kson"/>
-  <img src="https://img.shields.io/github/commit-activity/m/realtimetech-solution/kson"/>
+  <a href="#"><img src="https://img.shields.io/github/license/realtimetech-solution/kson"/></a>
+  <a href="#"><img src="https://img.shields.io/github/languages/code-size/realtimetech-solution/kson"/></a>
+  <a href="#"><img src="https://img.shields.io/github/downloads/realtimetech-solution/kson/total"/></a>
+  <a href="https://github.com/realtimetech-solution/kson/issues"><img src="https://img.shields.io/github/issues/realtimetech-solution/kson"/></a>
+  <a href="https://github.com/realtimetech-solution/kson/commits/master"><img src="https://img.shields.io/github/commit-activity/m/realtimetech-solution/kson"/></a>
   <br>
-  <img src="https://img.shields.io/github/v/release/realtimetech-solution/kson"/>
-  <img src="https://img.shields.io/github/v/release/realtimetech-solution/kson?color=%23ff0000&include_prereleases&label=pre%20release"/>
+  <a href="https://github.com/realtimetech-solution/kson/releases"><img src="https://img.shields.io/github/v/release/realtimetech-solution/kson"/></a>
+  <a href="https://github.com/realtimetech-solution/kson/releases"><img src="https://img.shields.io/github/v/release/realtimetech-solution/kson?color=%23ff0000&include_prereleases&label=pre%20release"/></a>
 </p>
 
 # Kson
