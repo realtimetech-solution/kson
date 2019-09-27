@@ -2,7 +2,7 @@ package com.realtimetech.kson.element;
 
 import com.realtimetech.kson.util.string.StringMaker;
 
-public interface KsonValue {
+public interface JsonValue {
 	StringMaker stringMaker = new StringMaker();
 	
 	default public String toKsonString() {
@@ -62,8 +62,8 @@ public interface KsonValue {
 		if (object == null)
 			return "null";
 
-		if (object instanceof KsonValue) {
-			KsonValue ksonValue = (KsonValue) object;
+		if (object instanceof JsonValue) {
+			JsonValue ksonValue = (JsonValue) object;
 			return ksonValue.toString(useKsonStandard);
 		} else if (object instanceof String) {
 			String string = (String) object;
