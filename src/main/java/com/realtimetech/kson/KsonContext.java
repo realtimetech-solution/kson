@@ -121,17 +121,17 @@ public class KsonContext {
 		this.registeredTransformers.put(Collection.class, new Transformer<Collection<?>>() {
 			@Override
 			public Object serialize(KsonContext ksonContext, Collection<?> value) {
-				JsonArray ksonArray = new JsonArray();
+				JsonArray jsonArray = new JsonArray();
 
 				for (Object object : value) {
 					try {
-						ksonArray.add(ksonContext.addFromObjectStack(object));
+						jsonArray.add(ksonContext.addFromObjectStack(object));
 					} catch (SerializeException e) {
 						e.printStackTrace();
 					}
 				}
 
-				return ksonArray;
+				return jsonArray;
 			}
 
 			@SuppressWarnings("deprecation")
@@ -160,7 +160,7 @@ public class KsonContext {
 		this.registeredTransformers.put(Map.class, new Transformer<Map<?, ?>>() {
 			@Override
 			public Object serialize(KsonContext ksonContext, Map<?, ?> value) {
-				JsonObject ksonObject = new JsonObject();
+				JsonObject jsonObject = new JsonObject();
 
 				for (Object keyObject : value.keySet()) {
 					Object valueObject = value.get(keyObject);
@@ -168,13 +168,13 @@ public class KsonContext {
 					try {
 						Object keyKson = ksonContext.addFromObjectStack(keyObject);
 						Object valueKson = ksonContext.addFromObjectStack(valueObject);
-						ksonObject.put(keyKson, valueKson);
+						jsonObject.put(keyKson, valueKson);
 					} catch (SerializeException e) {
 						e.printStackTrace();
 					}
 				}
 
-				return ksonObject;
+				return jsonObject;
 			}
 
 			@SuppressWarnings("deprecation")
@@ -188,9 +188,9 @@ public class KsonContext {
 					e.printStackTrace();
 				}
 
-				JsonObject ksonObject = (JsonObject) value;
-				for (Object keyObject : ksonObject.keySet()) {
-					Object valueObject = ksonObject.get(keyObject);
+				JsonObject jsonObject = (JsonObject) value;
+				for (Object keyObject : jsonObject.keySet()) {
+					Object valueObject = jsonObject.get(keyObject);
 
 					try {
 						map.put(ksonContext.addToObjectStack(keyObject.getClass(), keyObject), ksonContext.addToObjectStack(valueObject.getClass(), valueObject));
@@ -386,11 +386,11 @@ public class KsonContext {
 				Class<? extends Object> targetObjectClass = targetObject.getClass();
 
 				if (targetKson instanceof JsonObject) {
-					JsonObject ksonValue = (JsonObject) targetKson;
+					JsonObject jsonValue = (JsonObject) targetKson;
 
 					for (Field field : this.getAccessibleFields(targetObjectClass)) {
 						try {
-							Object createAtToObject = createAtToObject(false, field.getType(), ksonValue.get(field.getName()));
+							Object createAtToObject = createAtToObject(false, field.getType(), jsonValue.get(field.getName()));
 
 							if (createAtToObject.getClass() != field.getType()) {
 								createAtToObject = castToType(field.getType(), createAtToObject);
@@ -403,8 +403,8 @@ public class KsonContext {
 						}
 					}
 				} else {
-					JsonArray ksonValue = (JsonArray) targetKson;
-					int size = ksonValue.size();
+					JsonArray jsonValue = (JsonArray) targetKson;
+					int size = jsonValue.size();
 
 					for (int index = 0; index < size; index++) {
 						Class<?> arrayComponentType = targetObjectClass.getComponentType();
@@ -413,7 +413,7 @@ public class KsonContext {
 							arrayComponentType = targetObjectClass;
 						}
 
-						Object createAtToObject = createAtToObject(false, arrayComponentType, ksonValue.get(index));
+						Object createAtToObject = createAtToObject(false, arrayComponentType, jsonValue.get(index));
 
 						if (createAtToObject.getClass() != arrayComponentType) {
 							createAtToObject = castToType(arrayComponentType, createAtToObject);
@@ -479,14 +479,14 @@ public class KsonContext {
 			boolean useStack = true;
 
 			if (convertedValue instanceof JsonArray) {
-				JsonArray ksonArray = (JsonArray) convertedValue;
+				JsonArray jsonArray = (JsonArray) convertedValue;
 				Class<?> componentType = type.getComponentType();
 
 				if (componentType == null) {
 					componentType = type.getClass();
 				}
 
-				convertedValue = Array.newInstance(componentType, ksonArray.size());
+				convertedValue = Array.newInstance(componentType, jsonArray.size());
 			} else if (convertedValue instanceof JsonObject) {
 				if (primaryId == null) {
 					try {
@@ -543,16 +543,16 @@ public class KsonContext {
 				JsonValue targetKson = this.ksonStack.pop();
 
 				if (targetKson instanceof JsonObject) {
-					JsonObject ksonValue = (JsonObject) targetKson;
+					JsonObject jsonValue = (JsonObject) targetKson;
 					for (Field field : this.getAccessibleFields(targetObject.getClass())) {
 						try {
-							ksonValue.put(field.getName(), this.createAtFromObject(false, field.getType(), field.get(targetObject)));
+							jsonValue.put(field.getName(), this.createAtFromObject(false, field.getType(), field.get(targetObject)));
 						} catch (IllegalArgumentException | IllegalAccessException e) {
 							throw new SerializeException("Serialize failed because object could can't get from field.");
 						}
 					}
 				} else {
-					JsonArray ksonValue = (JsonArray) targetKson;
+					JsonArray jsonValue = (JsonArray) targetKson;
 					int length = Array.getLength(targetObject);
 
 					for (int index = 0; index < length; index++) {
@@ -562,7 +562,7 @@ public class KsonContext {
 							arrayComponentType = targetObject.getClass();
 						}
 
-						ksonValue.add(this.createAtFromObject(false, arrayComponentType, ArrayAccessor.get(targetObject, index)));
+						jsonValue.add(this.createAtFromObject(false, arrayComponentType, ArrayAccessor.get(targetObject, index)));
 					}
 				}
 			}
@@ -686,8 +686,8 @@ public class KsonContext {
 										Object value = valueStack.pop();
 										Object key = valueStack.pop();
 
-										JsonObject ksonObject = (JsonObject) valueStack.peek();
-										ksonObject.put(key, value);
+										JsonObject jsonObject = (JsonObject) valueStack.peek();
+										jsonObject.put(key, value);
 									}
 
 									if (currentChar == '}') {
@@ -700,8 +700,8 @@ public class KsonContext {
 									if (lastValidChar != '[') {
 										Object value = valueStack.pop();
 
-										JsonArray ksonArray = (JsonArray) valueStack.peek();
-										ksonArray.add(value);
+										JsonArray jsonArray = (JsonArray) valueStack.peek();
+										jsonArray.add(value);
 									}
 
 									if (currentChar == ']') {
