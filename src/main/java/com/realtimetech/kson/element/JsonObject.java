@@ -2,7 +2,7 @@ package com.realtimetech.kson.element;
 
 import java.util.HashMap;
 
-public class KsonObject extends HashMap<Object, Object> implements KsonValue {
+public class JsonObject extends HashMap<Object, Object> implements JsonValue {
 
 	/**
 	 * 기본 Serial UID

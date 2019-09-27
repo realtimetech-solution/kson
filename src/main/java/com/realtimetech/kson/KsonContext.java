@@ -15,9 +15,9 @@ import java.util.UUID;
 
 import com.realtimetech.kson.annotation.Ignore;
 import com.realtimetech.kson.annotation.PrimaryKey;
-import com.realtimetech.kson.element.KsonArray;
-import com.realtimetech.kson.element.KsonObject;
-import com.realtimetech.kson.element.KsonValue;
+import com.realtimetech.kson.element.JsonArray;
+import com.realtimetech.kson.element.JsonObject;
+import com.realtimetech.kson.element.JsonValue;
 import com.realtimetech.kson.exception.DeserializeException;
 import com.realtimetech.kson.exception.SerializeException;
 import com.realtimetech.kson.util.stack.FastStack;
@@ -28,7 +28,7 @@ import com.realtimetech.reflection.allocate.UnsafeAllocator;
 
 @SuppressWarnings("unchecked")
 public class KsonContext {
-	private enum ValueMode {
+	private static enum ValueMode {
 		NONE, OBJECT, ARRAY, STRING, NUMBER
 	}
 
@@ -39,7 +39,7 @@ public class KsonContext {
 
 	// for object
 	private FastStack<Object> objectStack;
-	private FastStack<KsonValue> ksonStack;
+	private FastStack<JsonValue> jsonStack;
 	private boolean working;
 
 	private boolean useCustomTag;
@@ -67,7 +67,7 @@ public class KsonContext {
 		this.stringMaker = new StringMaker(stringBufferSize);
 
 		this.objectStack = new FastStack<Object>(stackSize);
-		this.ksonStack = new FastStack<KsonValue>(stackSize);
+		this.jsonStack = new FastStack<JsonValue>(stackSize);
 
 		this.useCustomTag = true;
 
@@ -121,17 +121,17 @@ public class KsonContext {
 		this.registeredTransformers.put(Collection.class, new Transformer<Collection<?>>() {
 			@Override
 			public Object serialize(KsonContext ksonContext, Collection<?> value) {
-				KsonArray ksonArray = new KsonArray();
+				JsonArray jsonArray = new JsonArray();
 
 				for (Object object : value) {
 					try {
-						ksonArray.add(ksonContext.addFromObjectStack(object));
+						jsonArray.add(ksonContext.addFromObjectStack(object));
 					} catch (SerializeException e) {
 						e.printStackTrace();
 					}
 				}
 
-				return ksonArray;
+				return jsonArray;
 			}
 
 			@SuppressWarnings("deprecation")
@@ -145,7 +145,7 @@ public class KsonContext {
 					e.printStackTrace();
 				}
 
-				for (Object object : (KsonArray) value) {
+				for (Object object : (JsonArray) value) {
 					try {
 						collections.add(ksonContext.addToObjectStack(object.getClass(), object));
 					} catch (Exception e) {
@@ -160,7 +160,7 @@ public class KsonContext {
 		this.registeredTransformers.put(Map.class, new Transformer<Map<?, ?>>() {
 			@Override
 			public Object serialize(KsonContext ksonContext, Map<?, ?> value) {
-				KsonObject ksonObject = new KsonObject();
+				JsonObject jsonObject = new JsonObject();
 
 				for (Object keyObject : value.keySet()) {
 					Object valueObject = value.get(keyObject);
@@ -168,13 +168,13 @@ public class KsonContext {
 					try {
 						Object keyKson = ksonContext.addFromObjectStack(keyObject);
 						Object valueKson = ksonContext.addFromObjectStack(valueObject);
-						ksonObject.put(keyKson, valueKson);
+						jsonObject.put(keyKson, valueKson);
 					} catch (SerializeException e) {
 						e.printStackTrace();
 					}
 				}
 
-				return ksonObject;
+				return jsonObject;
 			}
 
 			@SuppressWarnings("deprecation")
@@ -188,9 +188,9 @@ public class KsonContext {
 					e.printStackTrace();
 				}
 
-				KsonObject ksonObject = (KsonObject) value;
-				for (Object keyObject : ksonObject.keySet()) {
-					Object valueObject = ksonObject.get(keyObject);
+				JsonObject jsonObject = (JsonObject) value;
+				for (Object keyObject : jsonObject.keySet()) {
+					Object valueObject = jsonObject.get(keyObject);
 
 					try {
 						map.put(ksonContext.addToObjectStack(keyObject.getClass(), keyObject), ksonContext.addToObjectStack(valueObject.getClass(), valueObject));
@@ -265,7 +265,7 @@ public class KsonContext {
 		return useCustomTag;
 	}
 
-	private static final Class<?>[] SERIALIZE_WHITE_LIST = new Class[] { KsonObject.class, KsonArray.class, boolean.class, Boolean.class, int.class, Integer.class, double.class, Double.class, float.class, Float.class, long.class, Long.class, byte.class, Byte.class, short.class, Short.class, String.class };
+	private static final Class<?>[] SERIALIZE_WHITE_LIST = new Class[] { JsonObject.class, JsonArray.class, boolean.class, Boolean.class, int.class, Integer.class, double.class, Double.class, float.class, Float.class, long.class, Long.class, byte.class, Byte.class, short.class, Short.class, String.class };
 
 	private boolean isNeedSerialize(Class<?> clazz) {
 		for (Class<?> whiteClass : SERIALIZE_WHITE_LIST) {
@@ -363,8 +363,8 @@ public class KsonContext {
 			}
 		}
 
-		if (object instanceof KsonValue) {
-			return (T) this.addToObjectStack(clazz, (KsonValue) object);
+		if (object instanceof JsonValue) {
+			return (T) this.addToObjectStack(clazz, (JsonValue) object);
 		}
 
 		return (T) object;
@@ -381,16 +381,16 @@ public class KsonContext {
 			this.working = true;
 			while (!this.objectStack.isEmpty()) {
 				Object targetObject = this.objectStack.pop();
-				KsonValue targetKson = this.ksonStack.pop();
+				JsonValue targetKson = this.jsonStack.pop();
 
 				Class<? extends Object> targetObjectClass = targetObject.getClass();
 
-				if (targetKson instanceof KsonObject) {
-					KsonObject ksonValue = (KsonObject) targetKson;
+				if (targetKson instanceof JsonObject) {
+					JsonObject jsonValue = (JsonObject) targetKson;
 
 					for (Field field : this.getAccessibleFields(targetObjectClass)) {
 						try {
-							Object createAtToObject = createAtToObject(false, field.getType(), ksonValue.get(field.getName()));
+							Object createAtToObject = createAtToObject(false, field.getType(), jsonValue.get(field.getName()));
 
 							if (createAtToObject.getClass() != field.getType()) {
 								createAtToObject = castToType(field.getType(), createAtToObject);
@@ -403,8 +403,8 @@ public class KsonContext {
 						}
 					}
 				} else {
-					KsonArray ksonValue = (KsonArray) targetKson;
-					int size = ksonValue.size();
+					JsonArray jsonValue = (JsonArray) targetKson;
+					int size = jsonValue.size();
 
 					for (int index = 0; index < size; index++) {
 						Class<?> arrayComponentType = targetObjectClass.getComponentType();
@@ -413,7 +413,7 @@ public class KsonContext {
 							arrayComponentType = targetObjectClass;
 						}
 
-						Object createAtToObject = createAtToObject(false, arrayComponentType, ksonValue.get(index));
+						Object createAtToObject = createAtToObject(false, arrayComponentType, jsonValue.get(index));
 
 						if (createAtToObject.getClass() != arrayComponentType) {
 							createAtToObject = castToType(arrayComponentType, createAtToObject);
@@ -425,7 +425,7 @@ public class KsonContext {
 			}
 			this.working = false;
 			this.objectStack.reset();
-			this.ksonStack.reset();
+			this.jsonStack.reset();
 		}
 
 		return result;
@@ -441,8 +441,8 @@ public class KsonContext {
 		if (type.isEnum())
 			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
 
-		if (originalValue instanceof KsonObject) {
-			KsonObject wrappingObject = (KsonObject) originalValue;
+		if (originalValue instanceof JsonObject) {
+			JsonObject wrappingObject = (JsonObject) originalValue;
 
 			if (wrappingObject.containsKey("#class")) {
 				try {
@@ -478,16 +478,16 @@ public class KsonContext {
 		if (this.isNeedSerialize(type)) {
 			boolean useStack = true;
 
-			if (convertedValue instanceof KsonArray) {
-				KsonArray ksonArray = (KsonArray) convertedValue;
+			if (convertedValue instanceof JsonArray) {
+				JsonArray jsonArray = (JsonArray) convertedValue;
 				Class<?> componentType = type.getComponentType();
 
 				if (componentType == null) {
 					componentType = type.getClass();
 				}
 
-				convertedValue = Array.newInstance(componentType, ksonArray.size());
-			} else if (convertedValue instanceof KsonObject) {
+				convertedValue = Array.newInstance(componentType, jsonArray.size());
+			} else if (convertedValue instanceof JsonObject) {
 				if (primaryId == null) {
 					try {
 						convertedValue = UnsafeAllocator.newInstance(type);
@@ -515,7 +515,7 @@ public class KsonContext {
 			}
 
 			if (useStack && convertedValue != null) {
-				this.ksonStack.push((KsonValue) originalValue);
+				this.jsonStack.push((JsonValue) originalValue);
 				this.objectStack.push(convertedValue);
 			}
 		}
@@ -523,9 +523,9 @@ public class KsonContext {
 		return convertedValue;
 	}
 
-	public KsonValue fromObject(Object object) throws SerializeException {
+	public JsonValue fromObject(Object object) throws SerializeException {
 		if (!this.working) {
-			return (KsonValue) addFromObjectStack(object);
+			return (JsonValue) addFromObjectStack(object);
 		} else {
 			throw new SerializeException("This context already running serialize!");
 		}
@@ -540,19 +540,19 @@ public class KsonContext {
 
 			while (!this.objectStack.isEmpty()) {
 				Object targetObject = this.objectStack.pop();
-				KsonValue targetKson = this.ksonStack.pop();
+				JsonValue targetKson = this.jsonStack.pop();
 
-				if (targetKson instanceof KsonObject) {
-					KsonObject ksonValue = (KsonObject) targetKson;
+				if (targetKson instanceof JsonObject) {
+					JsonObject jsonValue = (JsonObject) targetKson;
 					for (Field field : this.getAccessibleFields(targetObject.getClass())) {
 						try {
-							ksonValue.put(field.getName(), this.createAtFromObject(false, field.getType(), field.get(targetObject)));
+							jsonValue.put(field.getName(), this.createAtFromObject(false, field.getType(), field.get(targetObject)));
 						} catch (IllegalArgumentException | IllegalAccessException e) {
 							throw new SerializeException("Serialize failed because object could can't get from field.");
 						}
 					}
 				} else {
-					KsonArray ksonValue = (KsonArray) targetKson;
+					JsonArray jsonValue = (JsonArray) targetKson;
 					int length = Array.getLength(targetObject);
 
 					for (int index = 0; index < length; index++) {
@@ -562,13 +562,13 @@ public class KsonContext {
 							arrayComponentType = targetObject.getClass();
 						}
 
-						ksonValue.add(this.createAtFromObject(false, arrayComponentType, ArrayAccessor.get(targetObject, index)));
+						jsonValue.add(this.createAtFromObject(false, arrayComponentType, ArrayAccessor.get(targetObject, index)));
 					}
 				}
 			}
 
 			this.objectStack.reset();
-			this.ksonStack.reset();
+			this.jsonStack.reset();
 			this.working = false;
 		} else {
 			result = this.createAtFromObject(false, Object.class, object);
@@ -596,7 +596,7 @@ public class KsonContext {
 			Field primaryKeyField = getPrimaryKeyField(originalValueType);
 
 			if (primaryKeyField != null) {
-				KsonObject wrappingObject = new KsonObject();
+				JsonObject wrappingObject = new JsonObject();
 
 				try {
 					wrappingObject.put("@id", primaryKeyField.get(originalValue));
@@ -612,17 +612,17 @@ public class KsonContext {
 
 		if (this.isNeedSerialize(convertedKsonValue.getClass())) {
 			if (originalValue.getClass().isArray()) {
-				convertedKsonValue = new KsonArray();
+				convertedKsonValue = new JsonArray();
 			} else {
-				convertedKsonValue = new KsonObject();
+				convertedKsonValue = new JsonObject();
 			}
 
 			this.objectStack.push(originalValue);
-			this.ksonStack.push((KsonValue) convertedKsonValue);
+			this.jsonStack.push((JsonValue) convertedKsonValue);
 		}
 
 		if (this.isNeedSerialize(originalValueType) && type != originalValueType && this.useCustomTag) {
-			KsonObject wrappingObject = new KsonObject();
+			JsonObject wrappingObject = new JsonObject();
 
 			wrappingObject.put("#class", originalValueType.getName());
 			wrappingObject.put("#data", convertedKsonValue);
@@ -633,7 +633,7 @@ public class KsonContext {
 		return convertedKsonValue;
 	}
 
-	public KsonValue fromString(String kson) throws IOException {
+	public JsonValue fromString(String kson) throws IOException {
 		this.valueStack.reset();
 		this.modeStack.reset();
 
@@ -653,11 +653,11 @@ public class KsonContext {
 				if (currentMode == ValueMode.NONE || currentMode == ValueMode.OBJECT || currentMode == ValueMode.ARRAY) {
 					if (!(currentChar == ' ' || currentChar == '\t' || currentChar == '\n')) {
 						if (currentChar == '{') {
-							valueStack.push(new KsonObject());
+							valueStack.push(new JsonObject());
 							modeStack.push(ValueMode.OBJECT);
 							currentMode = modeStack.peek();
 						} else if (currentChar == '[') {
-							valueStack.push(new KsonArray());
+							valueStack.push(new JsonArray());
 							modeStack.push(ValueMode.ARRAY);
 							currentMode = modeStack.peek();
 						} else if (currentChar == '\"') {
@@ -686,8 +686,8 @@ public class KsonContext {
 										Object value = valueStack.pop();
 										Object key = valueStack.pop();
 
-										KsonObject ksonObject = (KsonObject) valueStack.peek();
-										ksonObject.put(key, value);
+										JsonObject jsonObject = (JsonObject) valueStack.peek();
+										jsonObject.put(key, value);
 									}
 
 									if (currentChar == '}') {
@@ -700,8 +700,8 @@ public class KsonContext {
 									if (lastValidChar != '[') {
 										Object value = valueStack.pop();
 
-										KsonArray ksonArray = (KsonArray) valueStack.peek();
-										ksonArray.add(value);
+										JsonArray jsonArray = (JsonArray) valueStack.peek();
+										jsonArray.add(value);
 									}
 
 									if (currentChar == ']') {
@@ -816,6 +816,6 @@ public class KsonContext {
 			throw new IOException("An exception occurred at " + (pointer - 1) + " position character(" + charArray[(pointer - 1)] + ")");
 		}
 
-		return (KsonValue) valueStack.pop();
+		return (JsonValue) valueStack.pop();
 	}
 }

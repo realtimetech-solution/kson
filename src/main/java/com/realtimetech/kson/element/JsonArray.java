@@ -2,7 +2,7 @@ package com.realtimetech.kson.element;
 
 import java.util.ArrayList;
 
-public class KsonArray extends ArrayList<Object> implements KsonValue {
+public class JsonArray extends ArrayList<Object> implements JsonValue {
 
 	/**
 	 * 기본 Serial UID
