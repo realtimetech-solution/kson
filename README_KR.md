@@ -70,7 +70,7 @@ Kson은 Json 표준을 호환하는 새로운 데이터 포맷입니다, 기존 
 ### 2.1. 받아오기
 
 #### 2.1.1. Gradle
-```
+```groovy
 allprojects {
    repositories {
       maven { url 'https://jitpack.io' }
@@ -83,7 +83,7 @@ dependencies {
 ```
 
 #### 2.1.2. Maven
-```
+```xml
 <repositories>
    <repository>
       <id>jitpack.io</id>
@@ -99,9 +99,7 @@ dependencies {
 ```
 
 #### 2.1.3. Jar
-```
-이 저장소의 릴리즈 페이지를 참고해주세요.
-```
+이 저장소의 [릴리즈 페이지](https://github.com/realtimetech-solution/kson/releases)를 참고해주세요.
 
 ### 2.2. 사용법
 
@@ -109,19 +107,19 @@ dependencies {
 기본적으로 모든 Parse, Serialize, Deserialize는 KsonContext 객체를 통해서 사용 가능합니다.
 
 ##### 2.2.1.1. Builder를 통해서 생성
-```
+```java
 KsonBuilder ksonBuilder = new KsonBuilder();
 
 KsonContext ksonContext = ksonBuilder.build();
 ```
 
 ##### 2.2.1.2. 일반적인 생성
-```
+```java
 KsonContext ksonContext = new KsonContext();
 ```
 
 ##### 2.2.1.3. Thread-Safe Pool를 이용한 생성
-```
+```java
 KsonBuilder ksonBuilder = new KsonBuilder();
 KsonPool ksonPool = new KsonPool(ksonBuilder);
 
@@ -129,7 +127,7 @@ KsonContext ksonContext = ksonPool.get();
 ```
 
 #### 2.2.2. String to JsonValue
-```
+```java
 KsonContext ksonContext = new KsonContext();
 
 String jsonString = "{...}";
@@ -137,14 +135,14 @@ JsonValue jsonValue = ksonContext.fromString(jsonString);
 ```
 
 #### 2.2.3. JsonValue to String
-```
+```java
 JsonValue JsonValue = ...;
 String jsonString = JsonValue.toJsonString(); //일반적인 Json 포맷을 이용합니다.
 String ksonString = JsonValue.toKsonString(); //확장된 Kson 포맷을 이용합니다.
 ```
 
 #### 2.2.4. Object to JsonValue
-```
+```java
 KsonContext ksonContext = new KsonContext();
 
 Person personObject = someObject;
@@ -152,7 +150,7 @@ JsonValue jsonValue = ksonContext.fromObject(personObject);
 ```
 
 #### 2.2.5. JsonValue to Object
-```
+```java
 KsonContext ksonContext = new KsonContext();
 
 JsonValue JsonValue = ...;
@@ -160,7 +158,7 @@ Person personObject = ksonContext.toObject(Person.class, JsonValue);
 ```
 
 #### 2.2.6. String to (JsonValue) to Object
-```
+```java
 KsonContext ksonContext = new KsonContext();
 
 String jsonString = "{...}";
