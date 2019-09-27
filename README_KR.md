@@ -1,7 +1,7 @@
 <p align="right">
   <b>Languages</b><br>
-  <a href="README.md">Korean</a> |
-  <a href="README_EN.md">English</a>
+  <a href="README_KR.md">Korean</a> |
+  <a href="README.md">English</a>
 </p>
 
 <h1 align="center" style="max-width: 100%;">
