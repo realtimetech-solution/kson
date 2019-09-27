@@ -2,8 +2,8 @@ package com.realtimetech.kson.test;
 
 import com.realtimetech.kson.KsonContext;
 import com.realtimetech.kson.builder.KsonBuilder;
-import com.realtimetech.kson.element.KsonObject;
-import com.realtimetech.kson.element.KsonValue;
+import com.realtimetech.kson.element.JsonObject;
+import com.realtimetech.kson.element.JsonValue;
 import com.realtimetech.kson.exception.SerializeException;
 import com.realtimetech.kson.util.pool.KsonPool;
 
@@ -25,7 +25,7 @@ public class MainTest {
 					System.out.println("   Context Start: " + ksonContext);
 					for (int i = 0; i < 100000; i++) {
 						try {
-							KsonValue fromObject = ksonContext.fromObject(testObject);
+							JsonValue fromObject = ksonContext.fromObject(testObject);
 						} catch (SerializeException e) {
 							e.printStackTrace();
 						}
@@ -53,10 +53,10 @@ public class MainTest {
 			System.out.println("## First Converting");
 			System.out.println();
 
-			KsonObject testObjectKsonObject1 = (KsonObject) ksonContext.fromObject(testObject1);
+			JsonObject testObjectKsonObject1 = (JsonObject) ksonContext.fromObject(testObject1);
 			System.out.println("   TestObject\t: " + testObjectKsonObject1);
 
-			KsonObject testKsonObject1 = (KsonObject) ksonContext.fromObject(test1);
+			JsonObject testKsonObject1 = (JsonObject) ksonContext.fromObject(test1);
 			System.out.println("   Test\t\t: " + testKsonObject1);
 
 			System.out.println();
@@ -84,10 +84,10 @@ public class MainTest {
 			}
 			System.out.println();
 
-			KsonObject testObjectKsonObject2 = (KsonObject) ksonContext.fromObject(testObject2);
+			JsonObject testObjectKsonObject2 = (JsonObject) ksonContext.fromObject(testObject2);
 			System.out.println("   TestObject\t: " + testObjectKsonObject2);
 
-			KsonObject testKsonObject2 = (KsonObject) ksonContext.fromObject(test1);
+			JsonObject testKsonObject2 = (JsonObject) ksonContext.fromObject(test1);
 			System.out.println("   Test\t\t: " + testKsonObject2);
 
 			System.out.println();
@@ -107,9 +107,9 @@ public class MainTest {
 			TestObject collectObject = new TestObject(new Test(10, "100"));
 			Long startTime = System.currentTimeMillis();
 			for (int i = 0; i < 1000000; i++) {
-				KsonObject fromObject = (KsonObject) ksonContext.fromObject(collectObject);
+				JsonObject fromObject = (JsonObject) ksonContext.fromObject(collectObject);
 				TestObject good = ksonContext.toObject(TestObject.class, fromObject.toKsonString());
-				KsonObject toObject = (KsonObject) ksonContext.fromObject(good);
+				JsonObject toObject = (JsonObject) ksonContext.fromObject(good);
 			}
 			Long endTime = System.currentTimeMillis();
 
