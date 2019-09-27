@@ -4,6 +4,19 @@
   <a href="README_EN.md">English</a>
 </p>
 
+<h1 align="center" style="max-width: 100%;">
+  <a href="https://github.com/realtimetech-solution/kson"><img width="400px" alt="Kson Logo" src="resources/logo_tiny.png" style="max-width: 100%;"></a>
+</h1>
+<p align="center" style="max-width: 100%;">
+  <img src="https://img.shields.io/github/license/realtimetech-solution/kson"/>
+  <img src="https://img.shields.io/github/languages/code-size/realtimetech-solution/kson"/>
+  <img src="https://img.shields.io/github/downloads/realtimetech-solution/kson/total"/>
+  <img src="https://img.shields.io/github/issues/realtimetech-solution/kson"/>
+  <img src="https://img.shields.io/github/commit-activity/m/realtimetech-solution/kson"/>
+  <br>
+  <img src="https://img.shields.io/github/v/release/realtimetech-solution/kson"/>
+  <img src="https://img.shields.io/github/v/release/realtimetech-solution/kson?color=%23ff0000&include_prereleases&label=pre%20release"/>
+</p>
 
 # Kson
 > 이 프로젝트는 (주)리얼타임테크 솔루션 2팀에서 개발된 라이브러리입니다.
