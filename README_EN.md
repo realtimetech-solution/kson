@@ -115,38 +115,38 @@ KsonPool ksonPool = new KsonPool(ksonBuilder);
 KsonContext ksonContext = ksonPool.get();
 ```
 
-#### 2.2.2. String to KsonValue
+#### 2.2.2. String to JsonValue
 ```
 KsonContext ksonContext = new KsonContext();
 
 String jsonString = "{...}";
-KsonValue ksonValue = ksonContext.fromString(jsonString);
+JsonValue jsonValue = ksonContext.fromString(jsonString);
 ```
 
-#### 2.2.3. KsonValue to String
+#### 2.2.3. JsonValue to String
 ```
-KsonValue ksonValue = ...;
-String jsonString = ksonValue.toJsonString(); //Usage of standard Json format.
-String ksonString = ksonValue.toKsonString(); //Usage of extended Kson format.
+JsonValue jsonValue = ...;
+String jsonString = jsonValue.toJsonString(); //Usage of standard Json format.
+String ksonString = jsonValue.toKsonString(); //Usage of extended Kson format.
 ```
 
-#### 2.2.4. Object to KsonValue
+#### 2.2.4. Object to JsonValue
 ```
 KsonContext ksonContext = new KsonContext();
 
 Person personObject = someObject;
-KsonValue ksonValue = ksonContext.fromObject(personObject);
+JsonValue jsonValue = ksonContext.fromObject(personObject);
 ```
 
-#### 2.2.5. KsonValue to Object
+#### 2.2.5. JsonValue to Object
 ```
 KsonContext ksonContext = new KsonContext();
 
-KsonValue ksonValue = ...;
-Person personObject = ksonContext.toObject(Person.class, ksonValue);
+JsonValue jsonValue = ...;
+Person personObject = ksonContext.toObject(Person.class, jsonValue);
 ```
 
-#### 2.2.6. String to (KsonValue) to Object
+#### 2.2.6. String to (JsonValue) to Object
 ```
 KsonContext ksonContext = new KsonContext();
 
