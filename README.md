@@ -70,7 +70,7 @@ Kson is a new data format compatible with the Json standards. It solves the ambi
 ### 2.1. Get Started
 
 #### 2.1.1. Gradle
-```
+```groovy
 allprojects {
    repositories {
       maven { url 'https://jitpack.io' }
@@ -83,7 +83,7 @@ dependencies {
 ```
 
 #### 2.1.2. Maven
-```
+```xml
 <repositories>
    <repository>
       <id>jitpack.io</id>
@@ -99,9 +99,7 @@ dependencies {
 ```
 
 #### 2.1.3. Jar
-```
-Please refer to the releases part of this repository.
-```
+Please refer to the [releases](https://github.com/realtimetech-solution/kson/releases) part of this repository.
 
 ### 2.2. Usage
 
@@ -109,19 +107,19 @@ Please refer to the releases part of this repository.
 All Parse, Serialize, Deserialize are available through KsonContext by default.
 
 ##### 2.2.1.1. Create Through Builder
-```
+```java
 KsonBuilder ksonBuilder = new KsonBuilder();
 
 KsonContext ksonContext = ksonBuilder.build();
 ```
 
 ##### 2.2.1.2. General Creation
-```
+```java
 KsonContext ksonContext = new KsonContext();
 ```
 
 ##### 2.2.1.3. Create Through Thread-Safe Pool
-```
+```java
 KsonBuilder ksonBuilder = new KsonBuilder();
 KsonPool ksonPool = new KsonPool(ksonBuilder);
 
@@ -129,7 +127,7 @@ KsonContext ksonContext = ksonPool.get();
 ```
 
 #### 2.2.2. String to JsonValue
-```
+```java
 KsonContext ksonContext = new KsonContext();
 
 String jsonString = "{...}";
@@ -137,14 +135,14 @@ JsonValue jsonValue = ksonContext.fromString(jsonString);
 ```
 
 #### 2.2.3. JsonValue to String
-```
+```java
 JsonValue jsonValue = ...;
 String jsonString = jsonValue.toJsonString(); //Usage of standard Json format.
 String ksonString = jsonValue.toKsonString(); //Usage of extended Kson format.
 ```
 
 #### 2.2.4. Object to JsonValue
-```
+```java
 KsonContext ksonContext = new KsonContext();
 
 Person personObject = someObject;
@@ -152,7 +150,7 @@ JsonValue jsonValue = ksonContext.fromObject(personObject);
 ```
 
 #### 2.2.5. JsonValue to Object
-```
+```java
 KsonContext ksonContext = new KsonContext();
 
 JsonValue jsonValue = ...;
@@ -160,7 +158,7 @@ Person personObject = ksonContext.toObject(Person.class, jsonValue);
 ```
 
 #### 2.2.6. String to (JsonValue) to Object
-```
+```java
 KsonContext ksonContext = new KsonContext();
 
 String jsonString = "{...}";
