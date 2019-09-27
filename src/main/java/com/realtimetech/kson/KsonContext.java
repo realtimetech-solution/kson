@@ -39,7 +39,7 @@ public class KsonContext {
 
 	// for object
 	private FastStack<Object> objectStack;
-	private FastStack<JsonValue> ksonStack;
+	private FastStack<JsonValue> jsonStack;
 	private boolean working;
 
 	private boolean useCustomTag;
@@ -67,7 +67,7 @@ public class KsonContext {
 		this.stringMaker = new StringMaker(stringBufferSize);
 
 		this.objectStack = new FastStack<Object>(stackSize);
-		this.ksonStack = new FastStack<JsonValue>(stackSize);
+		this.jsonStack = new FastStack<JsonValue>(stackSize);
 
 		this.useCustomTag = true;
 
@@ -381,7 +381,7 @@ public class KsonContext {
 			this.working = true;
 			while (!this.objectStack.isEmpty()) {
 				Object targetObject = this.objectStack.pop();
-				JsonValue targetKson = this.ksonStack.pop();
+				JsonValue targetKson = this.jsonStack.pop();
 
 				Class<? extends Object> targetObjectClass = targetObject.getClass();
 
@@ -425,7 +425,7 @@ public class KsonContext {
 			}
 			this.working = false;
 			this.objectStack.reset();
-			this.ksonStack.reset();
+			this.jsonStack.reset();
 		}
 
 		return result;
@@ -515,7 +515,7 @@ public class KsonContext {
 			}
 
 			if (useStack && convertedValue != null) {
-				this.ksonStack.push((JsonValue) originalValue);
+				this.jsonStack.push((JsonValue) originalValue);
 				this.objectStack.push(convertedValue);
 			}
 		}
@@ -540,7 +540,7 @@ public class KsonContext {
 
 			while (!this.objectStack.isEmpty()) {
 				Object targetObject = this.objectStack.pop();
-				JsonValue targetKson = this.ksonStack.pop();
+				JsonValue targetKson = this.jsonStack.pop();
 
 				if (targetKson instanceof JsonObject) {
 					JsonObject jsonValue = (JsonObject) targetKson;
@@ -568,7 +568,7 @@ public class KsonContext {
 			}
 
 			this.objectStack.reset();
-			this.ksonStack.reset();
+			this.jsonStack.reset();
 			this.working = false;
 		} else {
 			result = this.createAtFromObject(false, Object.class, object);
@@ -618,7 +618,7 @@ public class KsonContext {
 			}
 
 			this.objectStack.push(originalValue);
-			this.ksonStack.push((JsonValue) convertedKsonValue);
+			this.jsonStack.push((JsonValue) convertedKsonValue);
 		}
 
 		if (this.isNeedSerialize(originalValueType) && type != originalValueType && this.useCustomTag) {
