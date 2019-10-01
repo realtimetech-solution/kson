@@ -186,7 +186,7 @@ public class Person {
 ```
 Now, 'tempArray' field is not serialized.
 
-##### 2.2.3.1. Ignore Field
+##### 2.2.3.1. Primary Key
 ```java
 public class Person {
    @PrimaryKey
