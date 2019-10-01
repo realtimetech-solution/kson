@@ -133,7 +133,10 @@ KsonPool ksonPool = new KsonPool(ksonBuilder);
 KsonContext ksonContext = ksonPool.get();
 ```
 
-#### 2.2.2. String to JsonValue
+#### 2.2.2. Serialize / Deserialize
+Kson은 String, Object, JsonValue에 대한 Serialize, Deserialize를 지원합니다.
+
+##### 2.2.2.1. String to JsonValue
 ```java
 KsonContext ksonContext = new KsonContext();
 
@@ -141,14 +144,14 @@ String jsonString = "{...}";
 JsonValue jsonValue = ksonContext.fromString(jsonString);
 ```
 
-#### 2.2.3. JsonValue to String
+##### 2.2.2.2. JsonValue to String
 ```java
-JsonValue JsonValue = ...;
+JsonValue jsonValue = ...;
 String jsonString = JsonValue.toJsonString(); //일반적인 Json 포맷을 이용합니다.
 String ksonString = JsonValue.toKsonString(); //확장된 Kson 포맷을 이용합니다.
 ```
 
-#### 2.2.4. Object to JsonValue
+##### 2.2.2.3. Object to JsonValue
 ```java
 KsonContext ksonContext = new KsonContext();
 
@@ -156,21 +159,47 @@ Person personObject = someObject;
 JsonValue jsonValue = ksonContext.fromObject(personObject);
 ```
 
-#### 2.2.5. JsonValue to Object
+##### 2.2.2.4. JsonValue to Object
 ```java
 KsonContext ksonContext = new KsonContext();
 
-JsonValue JsonValue = ...;
-Person personObject = ksonContext.toObject(Person.class, JsonValue);
+JsonValue jsonValue = ...;
+Person personObject = ksonContext.toObject(Person.class, jsonValue);
 ```
 
-#### 2.2.6. String to (JsonValue) to Object
+##### 2.2.2.5. String to (JsonValue) to Object
 ```java
 KsonContext ksonContext = new KsonContext();
 
 String jsonString = "{...}";
 Person personObject = ksonContext.toObject(Person.class, jsonString);
 ```
+
+#### 2.2.3. Ignore / PrimaryKey
+Kson은 Annotation을 통한 유용한 기능을 지원합니다.
+
+##### 2.2.3.1. Ignore Field
+```java
+public class Person {
+   private int id;
+   private String name;
+   
+   @Ignore
+   private byte[] tempArray;
+}
+```
+이제, 'tempArray' 필드는 Serialize 되지 않습니다.
+
+##### 2.2.3.1. Ignore Field
+```java
+public class Person {
+   @PrimaryKey
+   private int id;
+   
+   private String name;
+}
+```
+이제, 이 클래스의 인스턴스는 대신 'id' 필드로 Serialize 됩니다.
 
 ## 3. 라이센스 및 남기는 말
 
