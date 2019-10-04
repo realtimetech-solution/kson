@@ -2,40 +2,25 @@ package com.realtimetech.kson.element;
 
 import java.util.HashMap;
 
+import com.realtimetech.kson.writer.KsonWriter;
+
 public class JsonObject extends HashMap<Object, Object> implements JsonValue {
 
 	/**
 	 * 기본 Serial UID
 	 */
 	private static final long serialVersionUID = -6357620110797218097L;
-	
-	private final StringBuffer stringBuffer = new StringBuffer();
+
+	protected KsonWriter ksonWriter = null;
 
 	@Override
 	public String toString(boolean useKsonStandard) {
-		boolean firstElement = true;
+		if (ksonWriter == null)
+			this.ksonWriter = new KsonWriter();
 
-		stringBuffer.setLength(0);
+		this.ksonWriter.setUseKson(useKsonStandard);
 		
-		stringBuffer.append("{");
-		for (Object key : keySet()) {
-			Object value = get(key);
-
-			if (firstElement) {
-				firstElement = false;
-				stringBuffer.append(this.toString(key, useKsonStandard));
-				stringBuffer.append(":");
-				stringBuffer.append(this.toString(value, useKsonStandard));
-			} else {
-				stringBuffer.append(",");
-				stringBuffer.append(this.toString(key, useKsonStandard));
-				stringBuffer.append(":");
-				stringBuffer.append(this.toString(value, useKsonStandard));
-			}
-		}
-		stringBuffer.append("}");
-
-		return stringBuffer.toString();
+		return this.ksonWriter.toString(this);
 	}
 
 	@Override

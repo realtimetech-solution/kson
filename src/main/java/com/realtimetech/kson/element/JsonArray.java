@@ -2,34 +2,25 @@ package com.realtimetech.kson.element;
 
 import java.util.ArrayList;
 
+import com.realtimetech.kson.writer.KsonWriter;
+
 public class JsonArray extends ArrayList<Object> implements JsonValue {
 
 	/**
 	 * 기본 Serial UID
 	 */
 	private static final long serialVersionUID = 5513748119461105760L;
-	
-	private final StringBuffer stringBuffer = new StringBuffer();
+
+	protected KsonWriter ksonWriter = null;
 
 	@Override
 	public String toString(boolean useKsonStandard) {
-		boolean firstElement = true;
+		if (ksonWriter == null)
+			this.ksonWriter = new KsonWriter();
 
-		stringBuffer.setLength(0);
-		
-		stringBuffer.append("[");
-		for (Object object : this) {
-			if (firstElement) {
-				firstElement = false;
-				stringBuffer.append(this.toString(object, useKsonStandard));
-			} else {
-				stringBuffer.append(",");
-				stringBuffer.append(this.toString(object, useKsonStandard));
-			}
-		}
-		stringBuffer.append("]");
+		this.ksonWriter.setUseKson(useKsonStandard);
 
-		return stringBuffer.toString();
+		return this.ksonWriter.toString(this);
 	}
 
 	@Override

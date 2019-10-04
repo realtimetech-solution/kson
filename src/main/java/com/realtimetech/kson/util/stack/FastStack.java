@@ -9,6 +9,8 @@ public class FastStack<T> {
 
 	private int currentIndex;
 	private int scope;
+	
+	private int startIndex;
 
 	public FastStack() {
 		this(10);
@@ -17,6 +19,7 @@ public class FastStack<T> {
 	public FastStack(int raiseSize) {
 		this.raiseSize = raiseSize;
 		this.currentIndex = -1;
+		this.startIndex = 0;
 		this.scope = 0;
 
 		this.raiseArrays();
@@ -46,6 +49,10 @@ public class FastStack<T> {
 		this.objects[this.currentIndex] = object;
 	}
 
+	public T[] getArray() {
+		return objects;
+	}
+	
 	public boolean isEmpty() {
 		return this.currentIndex == -1;
 	}
@@ -69,8 +76,16 @@ public class FastStack<T> {
 		return object;
 	}
 
+	public T shift() {
+		if (this.currentIndex == -1)
+			throw new EmptyStackException();
+
+		return this.objects[this.startIndex++];
+	}
+
 	public void reset() {
 		this.currentIndex = -1;
+		this.startIndex = 0;
 	}
 
 	public int getSize() {
