@@ -28,15 +28,18 @@
 >
 >- #### 190% Faster then Gson
 >      Experience faster Object Serialize, Deserialize, and Json Parse!
+>      <img width="700px" alt="Kson Logo" src="resources/performance.png" style="max-width: 100%;">
 >
 >- #### Supported extended Number, Key Types (Optional)
 >      Specify ambiguous numeric data, and use Array and Dict as Dict's Key!
 >
 >- #### Automatically serialize Interface / Abstract Class field (Optional)
 >      Don't worry about the fields in interface, Abstract Class! (List or Map)
+>      <img width="500px" alt="Kson Logo" src="resources/interface-abstract.png" style="max-width: 100%;">
 >
 >- #### Make Primary Object (Optional)
 >      Manage Objects included in multiple objects as one by specifying Primary Key!
+>      <img width="500px" alt="Kson Logo" src="resources/primary-object.png" style="max-width: 100%;">
 >
 
 
@@ -126,7 +129,10 @@ KsonPool ksonPool = new KsonPool(ksonBuilder);
 KsonContext ksonContext = ksonPool.get();
 ```
 
-#### 2.2.2. String to JsonValue
+#### 2.2.2. Serialize / Deserialize
+Kson supports Serialize and Deserialize for String, Object, and JsonValue.
+
+##### 2.2.2.1. String to JsonValue
 ```java
 KsonContext ksonContext = new KsonContext();
 
@@ -134,14 +140,14 @@ String jsonString = "{...}";
 JsonValue jsonValue = ksonContext.fromString(jsonString);
 ```
 
-#### 2.2.3. JsonValue to String
+##### 2.2.2.2. JsonValue to String
 ```java
 JsonValue jsonValue = ...;
 String jsonString = jsonValue.toJsonString(); //Usage of standard Json format.
 String ksonString = jsonValue.toKsonString(); //Usage of extended Kson format.
 ```
 
-#### 2.2.4. Object to JsonValue
+##### 2.2.2.3. Object to JsonValue
 ```java
 KsonContext ksonContext = new KsonContext();
 
@@ -149,7 +155,7 @@ Person personObject = someObject;
 JsonValue jsonValue = ksonContext.fromObject(personObject);
 ```
 
-#### 2.2.5. JsonValue to Object
+##### 2.2.2.4. JsonValue to Object
 ```java
 KsonContext ksonContext = new KsonContext();
 
@@ -157,13 +163,39 @@ JsonValue jsonValue = ...;
 Person personObject = ksonContext.toObject(Person.class, jsonValue);
 ```
 
-#### 2.2.6. String to (JsonValue) to Object
+##### 2.2.2.5. String to (JsonValue) to Object
 ```java
 KsonContext ksonContext = new KsonContext();
 
 String jsonString = "{...}";
 Person personObject = ksonContext.toObject(Person.class, jsonString);
 ```
+
+#### 2.2.3. Ignore / PrimaryKey
+Kson supports useful functions through Annotation.
+
+##### 2.2.3.1. Ignore Field
+```java
+public class Person {
+   private int id;
+   private String name;
+   
+   @Ignore
+   private byte[] tempArray;
+}
+```
+Now, 'tempArray' field is not serialized.
+
+##### 2.2.3.1. Ignore Field
+```java
+public class Person {
+   @PrimaryKey
+   private int id;
+   
+   private String name;
+}
+```
+Now, this class's instance is serialize by 'id' field instead.
 
 ## 3. License and Afterword
 
