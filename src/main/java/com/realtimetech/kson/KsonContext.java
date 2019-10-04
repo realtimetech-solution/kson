@@ -214,7 +214,6 @@ public class KsonContext {
 				return UUID.fromString((String) value);
 			}
 		});
-
 	}
 
 	private Class<?> getClassByName(String name) throws ClassNotFoundException {
