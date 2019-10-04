@@ -1,5 +1,7 @@
 package com.realtimetech.kson.util.string;
 
+import java.util.Arrays;
+
 public class StringMaker {
 	private int raiseSize;
 
@@ -55,6 +57,10 @@ public class StringMaker {
 		this.currentIndex--;
 	}
 
+	public char[] toArray() {
+		return Arrays.copyOfRange(chars, 0, this.currentIndex + 1);
+	}
+	
 	public String toString() {
 		return new String(chars, 0, this.currentIndex + 1);
 	}
