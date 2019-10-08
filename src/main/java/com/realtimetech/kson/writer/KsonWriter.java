@@ -35,7 +35,7 @@ public class KsonWriter {
 		this.charsStack.reset();
 		int calc = this.prepareConvert(jsonValue);
 
-		if(this.characters.length != calc) {
+		if (this.characters.length != calc) {
 			this.characters = new char[calc];
 		}
 		this.charIndex = 0;
@@ -47,7 +47,7 @@ public class KsonWriter {
 	private char[] convertValueToChars(Object value) {
 		if (String.class.isInstance(value)) {
 			String string = (String) value;
-			
+
 			int size = 2;
 			char[] charArray = string.toCharArray();
 			for (int i = 0; i < string.length(); i++) {
@@ -79,7 +79,7 @@ public class KsonWriter {
 				}
 			}
 
-			if(this.stringBuffer.length != size) {
+			if (this.stringBuffer.length != size) {
 				this.stringBuffer = new char[size];
 			}
 			int index = 0;
@@ -127,13 +127,13 @@ public class KsonWriter {
 			return NULL_CHARS;
 		} else if (useKson) {
 			if (value instanceof Float) {
-				return (value.toString() + "F").toCharArray();
+				return (value.toString().concat("F")).toCharArray();
 			} else if (value instanceof Double) {
-				return (value.toString() + "D").toCharArray();
+				return (value.toString().concat("D")).toCharArray();
 			} else if (value instanceof Long) {
-				return (value.toString() + "L").toCharArray();
+				return (value.toString().concat("L")).toCharArray();
 			} else if (value instanceof Byte) {
-				return (value.toString() + "B").toCharArray();
+				return (value.toString().concat("B")).toCharArray();
 			} else {
 				return value.toString().toCharArray();
 			}
