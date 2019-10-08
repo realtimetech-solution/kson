@@ -10,6 +10,8 @@ public class StringMaker {
 	private int currentIndex;
 	private int scope;
 
+	private int currentSize;
+	
 	public StringMaker() {
 		this(10);
 	}
@@ -18,7 +20,8 @@ public class StringMaker {
 		this.raiseSize = raiseSize;
 		this.currentIndex = -1;
 		this.scope = 0;
-
+		this.currentSize = 0;
+		
 		this.raiseArrays();
 	}
 
@@ -27,7 +30,8 @@ public class StringMaker {
 
 		char[] oldObjects = this.chars;
 
-		this.chars = new char[scope * this.raiseSize];
+		this.currentSize = this.scope * this.raiseSize;
+		this.chars = new char[this.currentSize];
 
 		if (oldObjects != null) {
 			for (int i = 0; i <= currentIndex; i++) {
@@ -37,7 +41,7 @@ public class StringMaker {
 	}
 
 	public void add(char object) {
-		if (this.currentIndex + 2 >= this.scope * this.raiseSize) {
+		if (this.currentIndex + 2 >= this.currentSize) {
 			raiseArrays();
 		}
 

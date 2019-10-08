@@ -17,7 +17,7 @@ public class KsonWriter {
 
 	public KsonWriter() {
 		this.charsStack = new FastStack<char[]>(100);
-		this.stringMaker = new StringMaker(10);
+		this.stringMaker = new StringMaker(100);
 		this.useKson = true;
 	}
 
@@ -31,7 +31,7 @@ public class KsonWriter {
 
 	public String toString(JsonValue jsonValue) {
 		this.charsStack.reset();
-		int calc = prepareConvert(jsonValue);
+		int calc = this.prepareConvert(jsonValue);
 
 		this.characters = new char[calc];
 		this.charIndex = 0;
@@ -43,48 +43,48 @@ public class KsonWriter {
 	private char[] convertValueToChars(Object value) {
 		if (String.class.isInstance(value)) {
 			String string = (String) value;
-			stringMaker.reset();
+			this.stringMaker.reset();
 
-			stringMaker.add('\"');
+			this.stringMaker.add('\"');
 			char[] charArray = string.toCharArray();
 			for (int i = 0; i < string.length(); i++) {
 				char character = charArray[i];
 				switch (character) {
 				case '"':
-					stringMaker.add('\\');
-					stringMaker.add('\"');
+					this.stringMaker.add('\\');
+					this.stringMaker.add('\"');
 					break;
 				case '\\':
-					stringMaker.add('\\');
-					stringMaker.add('\\');
+					this.stringMaker.add('\\');
+					this.stringMaker.add('\\');
 					break;
 				case '\b':
-					stringMaker.add('\\');
-					stringMaker.add('b');
+					this.stringMaker.add('\\');
+					this.stringMaker.add('b');
 					break;
 				case '\f':
-					stringMaker.add('\\');
-					stringMaker.add('f');
+					this.stringMaker.add('\\');
+					this.stringMaker.add('f');
 					break;
 				case '\n':
-					stringMaker.add('\\');
-					stringMaker.add('n');
+					this.stringMaker.add('\\');
+					this.stringMaker.add('n');
 					break;
 				case '\r':
-					stringMaker.add('\\');
-					stringMaker.add('r');
+					this.stringMaker.add('\\');
+					this.stringMaker.add('r');
 					break;
 				case '\t':
-					stringMaker.add('\\');
-					stringMaker.add('t');
+					this.stringMaker.add('\\');
+					this.stringMaker.add('t');
 					break;
 				default:
-					stringMaker.add(character);
+					this.stringMaker.add(character);
 				}
 			}
-			stringMaker.add('\"');
+			this.stringMaker.add('\"');
 
-			return stringMaker.toArray();
+			return this.stringMaker.toArray();
 		} else if (useKson) {
 			if (value instanceof Float) {
 				return (value.toString() + "F").toCharArray();

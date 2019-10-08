@@ -8,6 +8,8 @@ public class FastStack<T> {
 	private T[] objects;
 
 	private int currentIndex;
+	private int currentSize;
+	
 	private int scope;
 	
 	private int startIndex;
@@ -31,7 +33,8 @@ public class FastStack<T> {
 
 		T[] oldObjects = this.objects;
 
-		this.objects = (T[]) new Object[scope * this.raiseSize];
+		this.currentSize = this.scope * this.raiseSize;
+		this.objects = (T[]) new Object[this.currentSize];
 
 		if (oldObjects != null) {
 			for (int i = 0; i <= currentIndex; i++) {
@@ -41,7 +44,7 @@ public class FastStack<T> {
 	}
 
 	public void push(T object) {
-		if (this.currentIndex + 2 >= this.scope * this.raiseSize) {
+		if (this.currentIndex + 2 >= this.currentSize) {
 			raiseArrays();
 		}
 
