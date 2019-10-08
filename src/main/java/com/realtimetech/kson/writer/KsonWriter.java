@@ -4,21 +4,23 @@ import com.realtimetech.kson.element.JsonArray;
 import com.realtimetech.kson.element.JsonObject;
 import com.realtimetech.kson.element.JsonValue;
 import com.realtimetech.kson.util.stack.FastStack;
-import com.realtimetech.kson.util.string.StringMaker;
 
 public class KsonWriter {
+	private final char[] NULL_CHARS = new char[] { 'n', 'u', 'l', 'l' };
+
 	private boolean useKson;
 
 	private FastStack<char[]> charsStack;
-	private StringMaker stringMaker;
 
 	private char[] characters;
+	private char[] stringBuffer;
 	private int charIndex;
 
 	public KsonWriter() {
 		this.charsStack = new FastStack<char[]>(100);
-		this.stringMaker = new StringMaker(10);
 		this.useKson = true;
+		this.characters = new char[0];
+		this.stringBuffer = new char[0];
 	}
 
 	public boolean isUseKson() {
@@ -31,9 +33,11 @@ public class KsonWriter {
 
 	public String toString(JsonValue jsonValue) {
 		this.charsStack.reset();
-		int calc = prepareConvert(jsonValue);
+		int calc = this.prepareConvert(jsonValue);
 
-		this.characters = new char[calc];
+		if(this.characters.length != calc) {
+			this.characters = new char[calc];
+		}
 		this.charIndex = 0;
 		this.convertString(jsonValue);
 
@@ -43,48 +47,84 @@ public class KsonWriter {
 	private char[] convertValueToChars(Object value) {
 		if (String.class.isInstance(value)) {
 			String string = (String) value;
-			stringMaker.reset();
-
-			stringMaker.add('\"');
+			
+			int size = 2;
 			char[] charArray = string.toCharArray();
 			for (int i = 0; i < string.length(); i++) {
 				char character = charArray[i];
 				switch (character) {
 				case '"':
-					stringMaker.add('\\');
-					stringMaker.add('\"');
+					size += 2;
 					break;
 				case '\\':
-					stringMaker.add('\\');
-					stringMaker.add('\\');
+					size += 2;
 					break;
 				case '\b':
-					stringMaker.add('\\');
-					stringMaker.add('b');
+					size += 2;
 					break;
 				case '\f':
-					stringMaker.add('\\');
-					stringMaker.add('f');
+					size += 2;
 					break;
 				case '\n':
-					stringMaker.add('\\');
-					stringMaker.add('n');
+					size += 2;
 					break;
 				case '\r':
-					stringMaker.add('\\');
-					stringMaker.add('r');
+					size += 2;
 					break;
 				case '\t':
-					stringMaker.add('\\');
-					stringMaker.add('t');
+					size += 2;
 					break;
 				default:
-					stringMaker.add(character);
+					size += 1;
 				}
 			}
-			stringMaker.add('\"');
 
-			return stringMaker.toArray();
+			if(this.stringBuffer.length != size) {
+				this.stringBuffer = new char[size];
+			}
+			int index = 0;
+
+			this.stringBuffer[index++] = '\"';
+			for (int i = 0; i < string.length(); i++) {
+				char character = charArray[i];
+				switch (character) {
+				case '"':
+					this.stringBuffer[index++] = '\\';
+					this.stringBuffer[index++] = '\"';
+					break;
+				case '\\':
+					this.stringBuffer[index++] = '\\';
+					this.stringBuffer[index++] = '\\';
+					break;
+				case '\b':
+					this.stringBuffer[index++] = '\\';
+					this.stringBuffer[index++] = 'b';
+					break;
+				case '\f':
+					this.stringBuffer[index++] = '\\';
+					this.stringBuffer[index++] = 'f';
+					break;
+				case '\n':
+					this.stringBuffer[index++] = '\\';
+					this.stringBuffer[index++] = 'n';
+					break;
+				case '\r':
+					this.stringBuffer[index++] = '\\';
+					this.stringBuffer[index++] = 'r';
+					break;
+				case '\t':
+					this.stringBuffer[index++] = '\\';
+					this.stringBuffer[index++] = 't';
+					break;
+				default:
+					this.stringBuffer[index++] = character;
+				}
+			}
+			this.stringBuffer[index++] = '\"';
+
+			return this.stringBuffer;
+		} else if (value == null) {
+			return NULL_CHARS;
 		} else if (useKson) {
 			if (value instanceof Float) {
 				return (value.toString() + "F").toCharArray();
