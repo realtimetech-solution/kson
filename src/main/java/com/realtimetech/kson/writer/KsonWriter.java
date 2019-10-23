@@ -13,14 +13,12 @@ public class KsonWriter {
 	private FastStack<char[]> charsStack;
 
 	private char[] characters;
-	private char[] stringBuffer;
 	private int charIndex;
 
 	public KsonWriter() {
 		this.charsStack = new FastStack<char[]>(100);
 		this.useKson = true;
 		this.characters = new char[0];
-		this.stringBuffer = new char[0];
 	}
 
 	public boolean isUseKson() {
@@ -79,50 +77,48 @@ public class KsonWriter {
 				}
 			}
 
-			if (this.stringBuffer.length != size) {
-				this.stringBuffer = new char[size];
-			}
+			char[] stringBuffer = new char[size];
 			int index = 0;
 
-			this.stringBuffer[index++] = '\"';
+			stringBuffer[index++] = '\"';
 			for (int i = 0; i < string.length(); i++) {
 				char character = charArray[i];
 				switch (character) {
 				case '"':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = '\"';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = '\"';
 					break;
 				case '\\':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = '\\';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = '\\';
 					break;
 				case '\b':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 'b';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 'b';
 					break;
 				case '\f':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 'f';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 'f';
 					break;
 				case '\n':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 'n';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 'n';
 					break;
 				case '\r':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 'r';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 'r';
 					break;
 				case '\t':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 't';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 't';
 					break;
 				default:
-					this.stringBuffer[index++] = character;
+					stringBuffer[index++] = character;
 				}
 			}
-			this.stringBuffer[index++] = '\"';
+			stringBuffer[index++] = '\"';
 
-			return this.stringBuffer;
+			return stringBuffer;
 		} else if (value == null) {
 			return NULL_CHARS;
 		} else if (useKson) {
