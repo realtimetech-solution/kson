@@ -13,14 +13,12 @@ public class KsonWriter {
 	private FastStack<char[]> charsStack;
 
 	private char[] characters;
-	private char[] stringBuffer;
 	private int charIndex;
 
 	public KsonWriter() {
 		this.charsStack = new FastStack<char[]>(100);
 		this.useKson = true;
 		this.characters = new char[0];
-		this.stringBuffer = new char[0];
 	}
 
 	public boolean isUseKson() {
@@ -35,7 +33,7 @@ public class KsonWriter {
 		this.charsStack.reset();
 		int calc = this.prepareConvert(jsonValue);
 
-		if(this.characters.length != calc) {
+		if (this.characters.length != calc) {
 			this.characters = new char[calc];
 		}
 		this.charIndex = 0;
@@ -47,7 +45,7 @@ public class KsonWriter {
 	private char[] convertValueToChars(Object value) {
 		if (String.class.isInstance(value)) {
 			String string = (String) value;
-			
+
 			int size = 2;
 			char[] charArray = string.toCharArray();
 			for (int i = 0; i < string.length(); i++) {
@@ -79,61 +77,59 @@ public class KsonWriter {
 				}
 			}
 
-			if(this.stringBuffer.length != size) {
-				this.stringBuffer = new char[size];
-			}
+			char[] stringBuffer = new char[size];
 			int index = 0;
 
-			this.stringBuffer[index++] = '\"';
+			stringBuffer[index++] = '\"';
 			for (int i = 0; i < string.length(); i++) {
 				char character = charArray[i];
 				switch (character) {
 				case '"':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = '\"';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = '\"';
 					break;
 				case '\\':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = '\\';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = '\\';
 					break;
 				case '\b':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 'b';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 'b';
 					break;
 				case '\f':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 'f';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 'f';
 					break;
 				case '\n':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 'n';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 'n';
 					break;
 				case '\r':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 'r';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 'r';
 					break;
 				case '\t':
-					this.stringBuffer[index++] = '\\';
-					this.stringBuffer[index++] = 't';
+					stringBuffer[index++] = '\\';
+					stringBuffer[index++] = 't';
 					break;
 				default:
-					this.stringBuffer[index++] = character;
+					stringBuffer[index++] = character;
 				}
 			}
-			this.stringBuffer[index++] = '\"';
+			stringBuffer[index++] = '\"';
 
-			return this.stringBuffer;
+			return stringBuffer;
 		} else if (value == null) {
 			return NULL_CHARS;
 		} else if (useKson) {
 			if (value instanceof Float) {
-				return (value.toString() + "F").toCharArray();
+				return (value.toString().concat("F")).toCharArray();
 			} else if (value instanceof Double) {
-				return (value.toString() + "D").toCharArray();
+				return (value.toString().concat("D")).toCharArray();
 			} else if (value instanceof Long) {
-				return (value.toString() + "L").toCharArray();
+				return (value.toString().concat("L")).toCharArray();
 			} else if (value instanceof Byte) {
-				return (value.toString() + "B").toCharArray();
+				return (value.toString().concat("B")).toCharArray();
 			} else {
 				return value.toString().toCharArray();
 			}

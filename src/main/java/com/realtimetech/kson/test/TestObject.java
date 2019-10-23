@@ -60,9 +60,10 @@ public class TestObject {
 	private HashMap<String, String> stringMap;
 	private HashMap<String, Date> dateMap;
 	private HashMap<HashMap<String, String>, HashMap<String, String>> mapMap;
+	private HashMap<TestEnum, String> enumMap;
 
 	private Double doubleValue;
-	
+
 	public String validationObject(TestObject collectObject) throws IllegalArgumentException, IllegalAccessException {
 		for (Field field : collectObject.getClass().getDeclaredFields()) {
 			if (!field.isAnnotationPresent(Ignore.class)) {
@@ -258,7 +259,7 @@ public class TestObject {
 		}
 
 		this.doubleValue = 0d;
-		
+
 		this.doubleList = new LinkedList<Double>();
 		{
 			this.doubleList.add(0d);
@@ -294,8 +295,14 @@ public class TestObject {
 				this.mapMap.put(keyMap, valueMap);
 			}
 		}
+
+		this.enumMap = new HashMap<TestEnum, String>();
+		{
+			this.enumMap.put(TestEnum.TYPE_1, "A");
+			this.enumMap.put(TestEnum.TYPE_2, "B");
+		}
 	}
-	
+
 	public Double getDoubleValue() {
 		return doubleValue;
 	}
@@ -406,6 +413,10 @@ public class TestObject {
 
 	public List<Double> getDoubleList() {
 		return doubleList;
+	}
+
+	public HashMap<TestEnum, String> getEnumMap() {
+		return enumMap;
 	}
 
 	public TestEnum getEnumType1() {

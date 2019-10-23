@@ -437,9 +437,6 @@ public class KsonContext {
 		if (originalValue == null)
 			return null;
 
-		if (type.isEnum())
-			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
-
 		if (originalValue instanceof JsonObject) {
 			JsonObject wrappingObject = (JsonObject) originalValue;
 
@@ -460,6 +457,9 @@ public class KsonContext {
 				}
 			}
 		}
+
+		if (type.isEnum())
+			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
 
 		if (primaryId == null) {
 			Transformer<Object> transformer = (Transformer<Object>) this.getTransformer(type);
@@ -580,10 +580,11 @@ public class KsonContext {
 		if (originalValue == null)
 			return null;
 
-		if (originalValue.getClass().isEnum())
-			return originalValue.toString();
-
 		Class<? extends Object> originalValueType = originalValue.getClass();
+
+		if (originalValueType.isEnum()) {
+			originalValue = originalValue.toString();
+		}
 
 		Transformer<Object> transformer = (Transformer<Object>) this.getTransformer(originalValueType);
 
@@ -620,6 +621,7 @@ public class KsonContext {
 			this.jsonStack.push((JsonValue) convertedKsonValue);
 		}
 
+		
 		if (this.isNeedSerialize(originalValueType) && type != originalValueType && this.useCustomTag) {
 			JsonObject wrappingObject = new JsonObject();
 
