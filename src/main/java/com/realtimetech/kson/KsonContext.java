@@ -570,7 +570,7 @@ public class KsonContext {
 			this.jsonStack.reset();
 			this.working = false;
 		} else {
-			result = this.createAtFromObject(false, Object.class, object);
+			result = this.createAtFromObject(true, Object.class, object);
 		}
 
 		return result;
