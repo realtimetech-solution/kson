@@ -391,8 +391,10 @@ public class KsonContext {
 						try {
 							Object createAtToObject = createAtToObject(false, field.getType(), jsonValue.get(field.getName()));
 
-							if (createAtToObject.getClass() != field.getType()) {
-								createAtToObject = castToType(field.getType(), createAtToObject);
+							if(createAtToObject != null) {
+								if (createAtToObject.getClass() != field.getType()) {
+									createAtToObject = castToType(field.getType(), createAtToObject);
+								}
 							}
 
 							field.set(targetObject, createAtToObject);
