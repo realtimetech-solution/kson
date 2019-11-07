@@ -10,6 +10,7 @@ public class KsonBuilder {
 
 	private HashMap<Class<?>, Transformer<?>> registeredTransformers;
 
+	private ClassLoader classLoader;
 	private int stackSize;
 	private int stringBufferSize;
 
@@ -28,12 +29,24 @@ public class KsonBuilder {
 		return this;
 	}
 	
+	public ClassLoader getClassLoader() {
+		return classLoader;
+	}
+	
+	public KsonBuilder setClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+		
+		return this;
+	}
+	
 	public boolean isUseCustomTag() {
 		return useCustomTag;
 	}
 	
-	public void setUseCustomTag(boolean useCustomTag) {
+	public KsonBuilder setUseCustomTag(boolean useCustomTag) {
 		this.useCustomTag = useCustomTag;
+		
+		return this;
 	}
 
 	public int getStackSize() {
@@ -57,7 +70,7 @@ public class KsonBuilder {
 	}
 
 	public KsonContext build() {
-		KsonContext ksonContext = new KsonContext(this.stackSize, this.stringBufferSize);
+		KsonContext ksonContext = new KsonContext(this.classLoader, this.stackSize, this.stringBufferSize);
 
 		ksonContext.setUseCustomTag(this.useCustomTag);
 		

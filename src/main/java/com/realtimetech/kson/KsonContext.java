@@ -56,11 +56,18 @@ public class KsonContext {
 
 	private HashMap<String, Class<?>> cachedClasses;
 
+	private ClassLoader classLoader;
+	
 	public KsonContext() {
 		this(10, 100);
 	}
-
+	
 	public KsonContext(int stackSize, int stringBufferSize) {
+		this(KsonContext.class.getClassLoader(), stackSize, stringBufferSize);
+	}
+
+	public KsonContext(ClassLoader classLoader, int stackSize, int stringBufferSize) {
+		this.classLoader = classLoader;
 		this.working = false;
 		this.valueStack = new FastStack<Object>(stackSize);
 		this.modeStack = new FastStack<ValueMode>(stackSize);
@@ -218,7 +225,7 @@ public class KsonContext {
 
 	private Class<?> getClassByName(String name) throws ClassNotFoundException {
 		if (!this.cachedClasses.containsKey(name)) {
-			this.cachedClasses.put(name, Class.forName(name));
+			this.cachedClasses.put(name, classLoader.loadClass(name));
 		}
 
 		return this.cachedClasses.get(name);
