@@ -533,6 +533,10 @@ public class KsonContext {
 
 	public JsonValue fromObject(Object object) throws SerializeException {
 		if (!this.working) {
+			if(object == null) {
+				return null;
+			}
+			
 			return (JsonValue) addFromObjectStack(object);
 		} else {
 			throw new SerializeException("This context already running serialize!");
