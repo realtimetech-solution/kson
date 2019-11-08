@@ -19,6 +19,7 @@ public class KsonBuilder {
 		
 		this.registeredTransformers = new HashMap<Class<? extends Object>, Transformer<? extends Object>>();
 		
+		this.classLoader = KsonContext.class.getClassLoader();
 		this.stackSize = 10;
 		this.stringBufferSize = 100;
 	}
