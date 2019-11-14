@@ -246,8 +246,8 @@ public class KsonContext {
 				}
 
 				for (Field field : clazz.getDeclaredFields()) {
-					field.setAccessible(true);
 					if (!fields.contains(field) && !field.isAnnotationPresent(Ignore.class) && !Modifier.isStatic(field.getModifiers())) {
+						field.setAccessible(true);
 						fields.add(field);
 					}
 				}
