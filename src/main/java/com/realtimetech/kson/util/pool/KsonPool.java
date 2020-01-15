@@ -55,7 +55,7 @@ public class KsonPool {
 				for (Thread thread : this.writerPools.keySet()) {
 					if (!thread.isAlive()) {
 						freeWriter = this.writerPools.get(thread);
-						this.contextPools.remove(thread);
+						this.writerPools.remove(thread);
 						break;
 					}
 				}
