@@ -51,16 +51,24 @@ public class KsonContext {
 	private HashMap<Class<?>, Field> primaryKeys;
 
 	private HashMap<Class<?>, HashMap<Object, Object>> primaryObjects;
+	private HashMap<Class<?>, HashMap<Object, Object>> primaryUnsolvedObjects;
 
 	private HashMap<Class<?>, Field[]> cachedFields;
 
 	private HashMap<String, Class<?>> cachedClasses;
+
+	private ClassLoader classLoader;
 
 	public KsonContext() {
 		this(10, 100);
 	}
 
 	public KsonContext(int stackSize, int stringBufferSize) {
+		this(KsonContext.class.getClassLoader(), stackSize, stringBufferSize);
+	}
+
+	public KsonContext(ClassLoader classLoader, int stackSize, int stringBufferSize) {
+		this.classLoader = classLoader;
 		this.working = false;
 		this.valueStack = new FastStack<Object>(stackSize);
 		this.modeStack = new FastStack<ValueMode>(stackSize);
@@ -77,6 +85,7 @@ public class KsonContext {
 
 		this.primaryKeys = new HashMap<Class<?>, Field>();
 		this.primaryObjects = new HashMap<Class<?>, HashMap<Object, Object>>();
+		this.primaryUnsolvedObjects = new HashMap<Class<?>, HashMap<Object, Object>>();
 
 		this.cachedFields = new HashMap<Class<?>, Field[]>();
 
@@ -103,6 +112,23 @@ public class KsonContext {
 			@Override
 			public File deserialize(KsonContext ksonContext, Class<?> object, Object value) {
 				return new File(value.toString());
+			}
+		});
+
+		this.registeredTransformers.put(Class.class, new Transformer<Class<?>>() {
+			@Override
+			public Object serialize(KsonContext ksonContext, Class<?> value) {
+				return value.getName();
+			}
+
+			@Override
+			public Class<?> deserialize(KsonContext ksonContext, Class<?> object, Object value) {
+				try {
+					return classLoader.loadClass(value.toString());
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+				return null;
 			}
 		});
 
@@ -214,12 +240,11 @@ public class KsonContext {
 				return UUID.fromString((String) value);
 			}
 		});
-
 	}
 
 	private Class<?> getClassByName(String name) throws ClassNotFoundException {
 		if (!this.cachedClasses.containsKey(name)) {
-			this.cachedClasses.put(name, Class.forName(name));
+			this.cachedClasses.put(name, classLoader.loadClass(name));
 		}
 
 		return this.cachedClasses.get(name);
@@ -240,8 +265,8 @@ public class KsonContext {
 				}
 
 				for (Field field : clazz.getDeclaredFields()) {
-					field.setAccessible(true);
 					if (!fields.contains(field) && !field.isAnnotationPresent(Ignore.class) && !Modifier.isStatic(field.getModifiers())) {
+						field.setAccessible(true);
 						fields.add(field);
 					}
 				}
@@ -318,6 +343,10 @@ public class KsonContext {
 		return this.primaryKeys.get(type);
 	}
 
+	public HashMap<Class<?>, HashMap<Object, Object>> getPrimaryUnsolvedObjects() {
+		return primaryUnsolvedObjects;
+	}
+
 	private Object castToType(Class<?> type, Object object) {
 		if (object instanceof Number) {
 			Number number = (Number) object;
@@ -370,15 +399,38 @@ public class KsonContext {
 		return (T) object;
 	}
 
+	public boolean addPrimaryObject(Object object) {
+		Field primaryKeyField = getPrimaryKeyField(object.getClass());
+
+		if (primaryKeyField != null) {
+			try {
+				Object object2 = primaryKeyField.get(object);
+				if (!this.primaryObjects.containsKey(object.getClass())) {
+					this.primaryObjects.put(object.getClass(), new HashMap<Object, Object>());
+				}
+
+				this.primaryObjects.get(object.getClass()).put(object2, object);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	public Object addToObjectStack(Object object) throws DeserializeException {
 		return this.addToObjectStack(Object.class, object);
 	}
 
 	public Object addToObjectStack(Class<?> clazz, Object object) throws DeserializeException {
-		Object result = this.createAtToObject(true, clazz, object);
+		Object result = null;
 
 		if (!this.working) {
 			this.working = true;
+			result = this.createAtToObject(true, clazz, object);
+
 			while (!this.objectStack.isEmpty()) {
 				Object targetObject = this.objectStack.pop();
 				JsonValue targetKson = this.jsonStack.pop();
@@ -392,8 +444,10 @@ public class KsonContext {
 						try {
 							Object createAtToObject = createAtToObject(false, field.getType(), jsonValue.get(field.getName()));
 
-							if (createAtToObject.getClass() != field.getType()) {
-								createAtToObject = castToType(field.getType(), createAtToObject);
+							if (createAtToObject != null) {
+								if (createAtToObject.getClass() != field.getType()) {
+									createAtToObject = castToType(field.getType(), createAtToObject);
+								}
 							}
 
 							field.set(targetObject, createAtToObject);
@@ -426,6 +480,8 @@ public class KsonContext {
 			this.working = false;
 			this.objectStack.reset();
 			this.jsonStack.reset();
+		} else {
+			result = this.createAtToObject(false, clazz, object);
 		}
 
 		return result;
@@ -438,9 +494,6 @@ public class KsonContext {
 		if (originalValue == null)
 			return null;
 
-		if (type.isEnum())
-			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
-
 		if (originalValue instanceof JsonObject) {
 			JsonObject wrappingObject = (JsonObject) originalValue;
 
@@ -451,7 +504,13 @@ public class KsonContext {
 					throw new DeserializeException("Deserialize failed because can't find target class.");
 				}
 				originalValue = wrappingObject.get("#data");
-			} else if (wrappingObject.containsKey("@id")) {
+			}
+		}
+
+		if (originalValue instanceof JsonObject) {
+			JsonObject wrappingObject = (JsonObject) originalValue;
+
+			if (wrappingObject.containsKey("@id")) {
 				primaryId = wrappingObject.get("@id");
 			} else if (first) {
 				Field primaryKeyField = getPrimaryKeyField(type);
@@ -461,6 +520,9 @@ public class KsonContext {
 				}
 			}
 		}
+
+		if (type.isEnum())
+			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
 
 		if (primaryId == null) {
 			Transformer<Object> transformer = (Transformer<Object>) this.getTransformer(type);
@@ -505,7 +567,22 @@ public class KsonContext {
 						try {
 							hashMap.put(primaryId, UnsafeAllocator.newInstance(type));
 						} catch (Exception e) {
+							e.printStackTrace();
 							throw new DeserializeException("Deserialize failed because can't allocation primary object.");
+						}
+
+						if (!first) {
+							if (!this.primaryUnsolvedObjects.containsKey(type)) {
+								this.primaryUnsolvedObjects.put(type, new HashMap<Object, Object>());
+							}
+
+							this.primaryUnsolvedObjects.get(type).put(primaryId, hashMap.get(primaryId));
+						}
+					} else {
+						if (first) {
+							if (this.primaryUnsolvedObjects.containsKey(type)) {
+								this.primaryUnsolvedObjects.get(type).remove(primaryId);
+							}
 						}
 					}
 
@@ -525,6 +602,10 @@ public class KsonContext {
 
 	public JsonValue fromObject(Object object) throws SerializeException {
 		if (!this.working) {
+			if (object == null) {
+				return null;
+			}
+
 			return (JsonValue) addFromObjectStack(object);
 		} else {
 			throw new SerializeException("This context already running serialize!");
@@ -581,10 +662,11 @@ public class KsonContext {
 		if (originalValue == null)
 			return null;
 
-		if (originalValue.getClass().isEnum())
-			return originalValue.toString();
-
 		Class<? extends Object> originalValueType = originalValue.getClass();
+
+		if (originalValueType.isEnum()) {
+			originalValue = originalValue.toString();
+		}
 
 		Transformer<Object> transformer = (Transformer<Object>) this.getTransformer(originalValueType);
 

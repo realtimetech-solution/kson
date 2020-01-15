@@ -33,15 +33,16 @@ public class MainTest {
 					System.out.println("   Context Done: " + ksonContext);
 				}
 			});
-			
+
 			threads[i].start();
 			Thread.sleep(1000);
 		}
 
 		for (int i = 0; i < 5; i++) {
-			threads[i].join();
+			if (threads[i] != null)
+				threads[i].join();
 		}
-		
+
 		KsonContext ksonContext = ksonBuilder.build();
 
 		{
@@ -50,6 +51,7 @@ public class MainTest {
 			Test test1 = new Test(10, "Hello");
 			TestObject testObject1 = new TestObject(test1);
 
+			System.out.println();
 			System.out.println("## First Converting");
 			System.out.println();
 
@@ -106,7 +108,7 @@ public class MainTest {
 		{
 			TestObject collectObject = new TestObject(new Test(10, "100"));
 			Long startTime = System.currentTimeMillis();
-			for (int i = 0; i < 1000000; i++) {
+			for (int i = 0; i < 100000; i++) {
 				JsonObject fromObject = (JsonObject) ksonContext.fromObject(collectObject);
 				TestObject good = ksonContext.toObject(TestObject.class, fromObject.toKsonString());
 				JsonObject toObject = (JsonObject) ksonContext.fromObject(good);

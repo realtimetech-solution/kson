@@ -14,7 +14,7 @@ task fatJar(type: Jar) {
 }
 
 dependencies {
-	compile 'com.github.realtimetech-solution:reflection:0.1.2'
+	implementation 'com.github.realtimetech-solution:reflection:0.2.4'
 }
 
 jar {
