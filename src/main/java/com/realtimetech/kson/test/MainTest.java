@@ -66,15 +66,22 @@ public class MainTest {
 			System.out.println();
 			System.out.println();
 
+			ksonContext = ksonBuilder.build();
+
 			System.out.println("## Seconds Converting");
 			System.out.println();
 
 			TestObject testObject2 = ksonContext.toObject(TestObject.class, testObjectKsonObject1.toKsonString());
+
 			System.out.print("   Validation late works............... ");
-			if ((fieldTest = testObject2.validationObject(testObject1)) != null) {
-				System.out.println("OK!");
-			} else {
+			if ((fieldTest = testObject2.validationObject(testObject1)) == null) {
 				System.out.println("FAIL.");
+			} else {
+				if (fieldTest.equals("test")) {
+					System.out.println("OK!");
+				} else {
+					System.out.println("FAIL. " + fieldTest);
+				}
 			}
 			Test test2 = ksonContext.toObject(Test.class, testKsonObject1.toKsonString());
 

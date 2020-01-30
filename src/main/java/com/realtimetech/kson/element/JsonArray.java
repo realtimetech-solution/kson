@@ -2,6 +2,7 @@ package com.realtimetech.kson.element;
 
 import java.util.ArrayList;
 
+import com.realtimetech.kson.annotation.Ignore;
 import com.realtimetech.kson.writer.KsonWriter;
 
 public class JsonArray extends ArrayList<Object> implements JsonValue {
@@ -11,6 +12,7 @@ public class JsonArray extends ArrayList<Object> implements JsonValue {
 	 */
 	private static final long serialVersionUID = 5513748119461105760L;
 
+	@Ignore
 	protected KsonWriter ksonWriter = null;
 
 	@Override
@@ -26,5 +28,28 @@ public class JsonArray extends ArrayList<Object> implements JsonValue {
 	@Override
 	public String toString() {
 		return toKsonString();
+	}
+
+	@Ignore
+	private int unique = RANDOM.nextInt();
+
+	@Override
+	public int unique() {
+		return unique;
+	}
+	
+	@Override
+	public void unique(int unique) {
+		this.unique = unique;
+	}
+	
+	@Override
+	public int hashCode() {
+		return unique;
+	}
+	
+	@Override
+	public int actualHash() {
+		return super.hashCode();
 	}
 }

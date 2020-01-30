@@ -52,10 +52,16 @@ public class TestObject {
 	private ArrayList<Date> dateArrayList;
 	private List<Date> dateList;
 
+	private List<Object> arrayList;
+	private List<Object> nullList;
+
 	private LinkedList<Double> doubleLinkedList;
 	private List<Double> doubleList;
 
 	private LinkedList<TestSingle> testSingleList;
+
+	private HashMap<Object, Object> nullMap;
+	private HashMap<Object, Object> itemMap;
 
 	private HashMap<String, String> stringMap;
 	private HashMap<String, Date> dateMap;
@@ -69,7 +75,6 @@ public class TestObject {
 			if (!field.isAnnotationPresent(Ignore.class)) {
 				Object originalObject = field.get(this);
 				Object targetObject = field.get(collectObject);
-
 				if (!validation(originalObject, targetObject)) {
 					return field.getName();
 				}
@@ -80,6 +85,10 @@ public class TestObject {
 	}
 
 	private boolean validation(Object originalObject, Object targetObject) {
+		if (originalObject == null && targetObject == null) {
+			return true;
+		}
+
 		if (originalObject.getClass() == targetObject.getClass()) {
 			if (originalObject.getClass().isArray() && targetObject.getClass().isArray()) {
 				int originalLength = Array.getLength(originalObject);
@@ -102,13 +111,25 @@ public class TestObject {
 				Map<?, ?> targetMap = (Map<?, ?>) targetObject;
 
 				if (originalMap.keySet().size() == targetMap.keySet().size()) {
-
 					for (Object originalKeyObject : originalMap.keySet()) {
 						if (targetMap.containsKey(originalKeyObject)) {
 							Object originalValueObject = originalMap.get(originalKeyObject);
 							Object targetValueObject = targetMap.get(originalKeyObject);
 
 							if (!validation(originalValueObject, targetValueObject)) {
+								return false;
+							}
+						} else if (originalKeyObject instanceof Test) {
+							boolean oneTime = false;
+
+							for (Object targetKeyObject : targetMap.keySet()) {
+								if (validation(originalKeyObject, targetKeyObject)) {
+									oneTime = true;
+									break;
+								}
+							}
+
+							if (!oneTime) {
 								return false;
 							}
 						} else {
@@ -130,6 +151,21 @@ public class TestObject {
 					}
 
 				} else {
+					return false;
+				}
+			} else if (originalObject instanceof Test && targetObject instanceof Test) {
+				Test originalTest = (Test) originalObject;
+				Test targetTest = (Test) targetObject;
+
+				if(targetTest.getValue2() != null && originalTest.getValue2() == null) {
+					return false;
+				}
+				
+				if(originalTest.getValue2() != null && targetTest.getValue2() == null) {
+					return false;
+				}
+				
+				if (originalTest.getId() != targetTest.getId() || originalTest.getValue1() != targetTest.getValue1() || !originalTest.getValue2().equals(targetTest.getValue2())) {
 					return false;
 				}
 			} else {
@@ -201,10 +237,23 @@ public class TestObject {
 
 		this.date = new Date();
 
+		this.arrayList = new ArrayList<Object>();
+		{
+			this.arrayList.add(new int[10]);
+		}
+
 		this.dateArray = new Date[2];
 		{
 			this.dateArray[0] = new Date();
 			this.dateArray[1] = new Date();
+		}
+
+		this.nullList = new ArrayList<Object>();
+		{
+			this.nullList.add(null);
+			this.nullList.add(null);
+			this.nullList.add(null);
+			this.nullList.add(null);
 		}
 
 		this.stringArrayList = new ArrayList<String>();
@@ -237,6 +286,18 @@ public class TestObject {
 			this.dateList.add(new Date());
 			this.dateList.add(new Date());
 			this.dateList.add(new Date());
+		}
+
+		this.nullMap = new HashMap<Object, Object>();
+		{
+			this.nullMap.put(null, "ABC");
+			this.nullMap.put("B", null);
+		}
+
+		this.itemMap = new HashMap<Object, Object>();
+		{
+			this.itemMap.put(test, "ABC");
+			this.itemMap.put("B", test);
 		}
 
 		this.stringMap = new HashMap<String, String>();
@@ -301,6 +362,18 @@ public class TestObject {
 			this.enumMap.put(TestEnum.TYPE_1, "A");
 			this.enumMap.put(TestEnum.TYPE_2, "B");
 		}
+	}
+
+	public HashMap<Object, Object> getItemMap() {
+		return itemMap;
+	}
+
+	public List<Object> getNullList() {
+		return nullList;
+	}
+
+	public HashMap<Object, Object> getNullMap() {
+		return nullMap;
 	}
 
 	public Double getDoubleValue() {
