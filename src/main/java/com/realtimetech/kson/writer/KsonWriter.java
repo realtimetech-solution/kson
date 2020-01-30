@@ -30,6 +30,10 @@ public class KsonWriter {
 	}
 
 	public String toString(JsonValue jsonValue) {
+		if (jsonValue == null) {
+			return null;
+		}
+		
 		this.charsStack.reset();
 		int calc = this.prepareConvert(jsonValue);
 

@@ -173,7 +173,7 @@ public class KsonContext {
 
 				for (Object object : (JsonArray) value) {
 					try {
-						collections.add(ksonContext.addToObjectStack(object.getClass(), object));
+						collections.add(object == null ? null : ksonContext.addToObjectStack(object.getClass(), object));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -194,6 +194,7 @@ public class KsonContext {
 					try {
 						Object keyKson = ksonContext.addFromObjectStack(keyObject);
 						Object valueKson = ksonContext.addFromObjectStack(valueObject);
+
 						jsonObject.put(keyKson, valueKson);
 					} catch (SerializeException e) {
 						e.printStackTrace();
@@ -219,7 +220,7 @@ public class KsonContext {
 					Object valueObject = jsonObject.get(keyObject);
 
 					try {
-						map.put(ksonContext.addToObjectStack(keyObject.getClass(), keyObject), ksonContext.addToObjectStack(valueObject.getClass(), valueObject));
+						map.put(keyObject == null ? null : ksonContext.addToObjectStack(keyObject.getClass(), keyObject), valueObject == null ? null : ksonContext.addToObjectStack(valueObject.getClass(), valueObject));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -242,16 +243,60 @@ public class KsonContext {
 		});
 	}
 
+	private static final String PRIMITIVE_INT_ARRAY_NAME = int[].class.getName();
+	private static final String PRIMITIVE_FLOAT_ARRAY_NAME = float[].class.getName();
+	private static final String PRIMITIVE_BOOLEAN_ARRAY_NAME = boolean[].class.getName();
+	private static final String PRIMITIVE_CHAR_ARRAY_NAME = char[].class.getName();
+	private static final String PRIMITIVE_DOUBLE_ARRAY_NAME = double[].class.getName();
+	private static final String PRIMITIVE_LONG_ARRAY_NAME = long[].class.getName();
+	private static final String PRIMITIVE_SHORT_ARRAY_NAME = short[].class.getName();
+	private static final String PRIMITIVE_BYTE_ARRAY_NAME = byte[].class.getName();
+
 	private Class<?> getClassByName(String name) throws ClassNotFoundException {
-		if (!this.cachedClasses.containsKey(name)) {
-			this.cachedClasses.put(name, classLoader.loadClass(name));
+		if (name.length() == 2) {
+			if (PRIMITIVE_INT_ARRAY_NAME.equals(name)) {
+				return int[].class;
+			} else if (PRIMITIVE_FLOAT_ARRAY_NAME.equals(name)) {
+				return float[].class;
+			} else if (PRIMITIVE_BOOLEAN_ARRAY_NAME.equals(name)) {
+				return boolean[].class;
+			} else if (PRIMITIVE_CHAR_ARRAY_NAME.equals(name)) {
+				return char[].class;
+			} else if (PRIMITIVE_DOUBLE_ARRAY_NAME.equals(name)) {
+				return double[].class;
+			} else if (PRIMITIVE_LONG_ARRAY_NAME.equals(name)) {
+				return long[].class;
+			} else if (PRIMITIVE_SHORT_ARRAY_NAME.equals(name)) {
+				return short[].class;
+			} else if (PRIMITIVE_BYTE_ARRAY_NAME.equals(name)) {
+				return byte[].class;
+			}
 		}
 
-		return this.cachedClasses.get(name);
+		Class<?> target = this.cachedClasses.get(name);
+
+		if (target == null) {
+			Class<?> loadClass = classLoader.loadClass(name);
+			if (loadClass == null) {
+				loadClass = Object.class;
+			}
+			
+			target = loadClass;
+			this.cachedClasses.put(name, loadClass);
+		}
+
+		return target;
 	}
 
 	private Field[] getAccessibleFields(Class<?> clazz) {
 		if (!this.cachedFields.containsKey(clazz)) {
+			if (clazz == Integer.class) {
+				try {
+					throw new NullPointerException();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			LinkedList<Field> fields = new LinkedList<Field>();
 
 			if (clazz != null) {
@@ -323,7 +368,7 @@ public class KsonContext {
 		return this.transformers.get(type);
 	}
 
-	public Field getPrimaryKeyField(Class<?> type) {
+	private Field getPrimaryKeyField(Class<?> type) {
 		if (!this.primaryKeys.containsKey(type)) {
 			boolean matched = false;
 
@@ -383,33 +428,33 @@ public class KsonContext {
 		}
 	}
 
-	public <T> T toObject(Class<T> clazz, Object object) throws DeserializeException {
-		if (object instanceof String) {
-			try {
-				object = this.fromString((String) object);
-			} catch (IOException e) {
-
-			}
-		}
-
-		if (object instanceof JsonValue) {
-			return (T) this.addToObjectStack(clazz, (JsonValue) object);
-		}
-
-		return (T) object;
+	public <T> T toObject(Class<T> clazz, String string) throws DeserializeException, IOException {
+		return (T) this.toObject(clazz, this.fromString((String) string));
 	}
 
+	public <T> T toObject(Class<T> clazz, JsonValue object) throws DeserializeException {
+		return (T) this.addToObjectStack(clazz, (JsonValue) object);
+	}
+
+	@Deprecated
 	public boolean addPrimaryObject(Object object) {
+		if (object == null) {
+			return false;
+		}
+
 		Field primaryKeyField = getPrimaryKeyField(object.getClass());
 
 		if (primaryKeyField != null) {
 			try {
-				Object object2 = primaryKeyField.get(object);
+				Object objectBefore = primaryKeyField.get(object);
+
 				if (!this.primaryObjects.containsKey(object.getClass())) {
 					this.primaryObjects.put(object.getClass(), new HashMap<Object, Object>());
 				}
 
-				this.primaryObjects.get(object.getClass()).put(object2, object);
+				this.primaryObjects.get(object.getClass()).put(objectBefore, object);
+
+				return true;
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 
@@ -417,7 +462,7 @@ public class KsonContext {
 			}
 		}
 
-		return true;
+		return false;
 	}
 
 	public Object addToObjectStack(Object object) throws DeserializeException {
@@ -490,6 +535,7 @@ public class KsonContext {
 	@SuppressWarnings("rawtypes")
 	private Object createAtToObject(boolean first, Class<?> type, Object originalValue) throws DeserializeException {
 		Object primaryId = null;
+		Field primaryKeyField = null;
 
 		if (originalValue == null)
 			return null;
@@ -507,22 +553,24 @@ public class KsonContext {
 			}
 		}
 
+		if (type.isEnum()) {
+			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
+		}
+
 		if (originalValue instanceof JsonObject) {
 			JsonObject wrappingObject = (JsonObject) originalValue;
 
 			if (wrappingObject.containsKey("@id")) {
+				primaryKeyField = getPrimaryKeyField(type);
 				primaryId = wrappingObject.get("@id");
 			} else if (first) {
-				Field primaryKeyField = getPrimaryKeyField(type);
+				primaryKeyField = getPrimaryKeyField(type);
 
 				if (primaryKeyField != null) {
 					primaryId = wrappingObject.get(primaryKeyField.getName());
 				}
 			}
 		}
-
-		if (type.isEnum())
-			return Enum.valueOf((Class<Enum>) type, originalValue.toString());
 
 		if (primaryId == null) {
 			Transformer<Object> transformer = (Transformer<Object>) this.getTransformer(type);
@@ -565,7 +613,11 @@ public class KsonContext {
 
 					if (!hashMap.containsKey(primaryId)) {
 						try {
-							hashMap.put(primaryId, UnsafeAllocator.newInstance(type));
+							Object newInstance = UnsafeAllocator.newInstance(type);
+							hashMap.put(primaryId, newInstance);
+							if (primaryKeyField != null) {
+								primaryKeyField.set(newInstance, primaryId);
+							}
 						} catch (Exception e) {
 							e.printStackTrace();
 							throw new DeserializeException("Deserialize failed because can't allocation primary object.");
@@ -606,7 +658,17 @@ public class KsonContext {
 				return null;
 			}
 
-			return (JsonValue) addFromObjectStack(object);
+			Object convertedObject = addFromObjectStack(object);
+
+			if (convertedObject == null) {
+				return null;
+			}
+
+			if (convertedObject instanceof JsonValue) {
+				return (JsonValue) convertedObject;
+			}
+
+			throw new SerializeException("Can't serialize to json value!");
 		} else {
 			throw new SerializeException("This context already running serialize!");
 		}
@@ -674,25 +736,31 @@ public class KsonContext {
 			originalValue = transformer.serialize(this, originalValue);
 		}
 
+		boolean needSerialize = this.isNeedSerialize(originalValue.getClass());
+
 		if (!first && this.useCustomTag) {
-			Field primaryKeyField = getPrimaryKeyField(originalValueType);
+			if (needSerialize) {
+				Field primaryKeyField = getPrimaryKeyField(originalValueType);
 
-			if (primaryKeyField != null) {
-				JsonObject wrappingObject = new JsonObject();
+				if (primaryKeyField != null) {
+					JsonObject wrappingObject = new JsonObject();
 
-				try {
-					wrappingObject.put("@id", primaryKeyField.get(originalValue));
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new SerializeException("Serialize failed because primary key can't get from field.");
+					try {
+						wrappingObject.put("@id", primaryKeyField.get(originalValue));
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						throw new SerializeException("Serialize failed because primary key can't get from field.");
+					}
+
+					originalValue = wrappingObject;
+
+					needSerialize = false;
 				}
-
-				originalValue = wrappingObject;
 			}
 		}
 
 		Object convertedKsonValue = originalValue;
 
-		if (this.isNeedSerialize(convertedKsonValue.getClass())) {
+		if (needSerialize) {
 			if (originalValue.getClass().isArray()) {
 				convertedKsonValue = new JsonArray();
 			} else {

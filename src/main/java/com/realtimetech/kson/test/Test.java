@@ -17,6 +17,10 @@ public class Test {
 		this.value2 = value2;
 	}
 
+	public int getId() {
+		return id;
+	}
+
 	public int getValue1() {
 		return value1;
 	}
@@ -40,6 +44,6 @@ public class Test {
 	
 	@Override
 	public String toString() {
-		return id + "";
+		return "Test (" + this.hashCode() + ") (" + id + ")";
 	}
 }
