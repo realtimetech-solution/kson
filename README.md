@@ -35,11 +35,11 @@
 >
 >- #### Automatically serialize Interface / Abstract Class field (Optional)
 >      Don't worry about the fields in interface, Abstract Class! (List or Map)
->      <img width="500px" alt="Kson Logo" src="resources/interface-abstract.png" style="max-width: 100%;">
+>      <img width="600px" alt="Kson Logo" src="resources/interface-abstract.png" style="max-width: 100%;">
 >
 >- #### Make Primary Object (Optional)
 >      Manage Objects included in multiple objects as one by specifying Primary Key!
->      <img width="500px" alt="Kson Logo" src="resources/primary-object.png" style="max-width: 100%;">
+>      <img width="600px" alt="Kson Logo" src="resources/primary-object.png" style="max-width: 100%;">
 >
 
 
@@ -186,7 +186,7 @@ public class Person {
 ```
 Now, 'tempArray' field is not serialized.
 
-##### 2.2.3.1. Ignore Field
+##### 2.2.3.1. Primary Key
 ```java
 public class Person {
    @PrimaryKey

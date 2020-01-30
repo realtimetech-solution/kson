@@ -35,11 +35,11 @@
 >
 >- #### 자동 Interface 및 Abstract Class 필드 기록 (Optional)
 >      Object Serialize, Deserialize 단계의 문제인 Interface, Abstract Class 형태의 필드를 마음껏 이용하세요!
->      <img width="500px" alt="Kson Logo" src="resources/interface-abstract.png" style="max-width: 100%;">
+>      <img width="600px" alt="Kson Logo" src="resources/interface-abstract.png" style="max-width: 100%;">
 >
 >- #### Primary Object 설정 기능 (Optional)
 >      여러 객체에서 반복적으로 포함하는 Object를 Primary Key를 지정해서 하나로 묶어보세요! 
->      <img width="500px" alt="Kson Logo" src="resources/primary-object.png" style="max-width: 100%;">
+>      <img width="600px" alt="Kson Logo" src="resources/primary-object.png" style="max-width: 100%;">
 >
 
 
@@ -186,7 +186,7 @@ public class Person {
 ```
 이제, 'tempArray' 필드는 Serialize 되지 않습니다.
 
-##### 2.2.3.1. Ignore Field
+##### 2.2.3.1. Primary Key
 ```java
 public class Person {
    @PrimaryKey
