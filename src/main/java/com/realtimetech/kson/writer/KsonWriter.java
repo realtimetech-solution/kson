@@ -1,231 +1,173 @@
 package com.realtimetech.kson.writer;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import com.realtimetech.kson.element.JsonArray;
 import com.realtimetech.kson.element.JsonObject;
 import com.realtimetech.kson.element.JsonValue;
-import com.realtimetech.kson.util.stack.FastStack;
+import com.realtimetech.kson.util.string.StringWriter;
 
 public class KsonWriter {
-	private final char[] NULL_CHARS = new char[] { 'n', 'u', 'l', 'l' };
+	private static final char[] CONST_U2028 = "\\u2028".toCharArray();
+	private static final char[] CONST_U2029 = "\\u2029".toCharArray();
+
+	private static final char[] CONST_NULL_STRING = "null".toCharArray();
+
+	private static final char CONST_SEPARATOR_STRING = ',';
+
+	private static final char CONST_OBJECT_OPEN_STRING = '{';
+	private static final char CONST_OBJECT_MAP_STRING = ':';
+	private static final char CONST_OBJECT_CLOSE_STRING = '}';
+
+	private static final char CONST_ARRAY_OPEN_STRING = '[';
+	private static final char CONST_ARRAY_CLOSE_STRING = ']';
+
+	private static final char[][] CONST_REPLACEMENT_CHARS;
+
+	static {
+		CONST_REPLACEMENT_CHARS = new char[128][];
+		for (int i = 0; i <= 0x1f; i++) {
+			CONST_REPLACEMENT_CHARS[i] = String.format("\\u%04x", (int) i).toCharArray();
+		}
+		CONST_REPLACEMENT_CHARS['"'] = new char[] { '\\', '\"' };
+		CONST_REPLACEMENT_CHARS['\\'] = new char[] { '\\', '\\' };
+		CONST_REPLACEMENT_CHARS['\t'] = new char[] { '\\', 't' };
+		CONST_REPLACEMENT_CHARS['\b'] = new char[] { '\\', 'b' };
+		CONST_REPLACEMENT_CHARS['\n'] = new char[] { '\\', 'n' };
+		CONST_REPLACEMENT_CHARS['\r'] = new char[] { '\\', 'r' };
+		CONST_REPLACEMENT_CHARS['\f'] = new char[] { '\\', 'f' };
+	}
+
+	private StringWriter stringWriter;
 
 	private boolean useKson;
 
-	private FastStack<char[]> charsStack;
-
-	private char[] characters;
-	private int charIndex;
-
 	public KsonWriter() {
-		this.charsStack = new FastStack<char[]>(100);
-		this.useKson = true;
-		this.characters = new char[0];
+		this.stringWriter = new StringWriter();
 	}
 
-	public boolean isUseKson() {
-		return useKson;
+	public String toString(JsonValue jsonValue) throws IOException {
+		return this.toString(jsonValue, true);
 	}
 
-	public void setUseKson(boolean useKson) {
+	public String toString(JsonValue jsonValue, boolean useKson) throws IOException {
 		this.useKson = useKson;
+
+		this.stringWriter.reset();
+
+		this.recursiveWrite(jsonValue);
+
+		return this.stringWriter.toString();
 	}
 
-	public String toString(JsonValue jsonValue) {
-		if (jsonValue == null) {
-			return null;
+	public void recursiveWrite(Object object) throws IOException {
+		if (object == null) {
+			stringWriter.write(CONST_NULL_STRING);
+			return;
 		}
-		
-		this.charsStack.reset();
-		int calc = this.prepareConvert(jsonValue);
 
-		if (this.characters.length != calc) {
-			this.characters = new char[calc];
+		if (JsonObject.class.isInstance(object)) {
+			JsonObject jsonObject = (JsonObject) object;
+
+			stringWriter.write(CONST_OBJECT_OPEN_STRING);
+			int count = 0;
+			for (Object key : jsonObject.keySet()) {
+				Object value = jsonObject.get(key);
+
+				if (count != 0) {
+					stringWriter.write(CONST_SEPARATOR_STRING);
+				}
+
+				this.recursiveWrite(key);
+				stringWriter.write(CONST_OBJECT_MAP_STRING);
+				this.recursiveWrite(value);
+
+				count++;
+			}
+			stringWriter.write(CONST_OBJECT_CLOSE_STRING);
+			return;
+		} else if (JsonArray.class.isInstance(object)) {
+			JsonArray jsonArray = (JsonArray) object;
+
+			stringWriter.write(CONST_ARRAY_OPEN_STRING);
+			Iterator<Object> iterator = jsonArray.iterator();
+
+			int count = 0;
+			while (iterator.hasNext()) {
+				Object value = iterator.next();
+
+				if (count != 0) {
+					stringWriter.write(CONST_SEPARATOR_STRING);
+				}
+
+				this.recursiveWrite(value);
+
+				count++;
+			}
+			stringWriter.write(CONST_ARRAY_CLOSE_STRING);
+			return;
+		} else if (String.class.isInstance(object)) {
+			writeString((String) object);
+			return;
+		} else if (this.useKson) {
+			writeNumber(object);
+			return;
+		} else {
+			stringWriter.write(object.toString().toCharArray());
+			return;
 		}
-		this.charIndex = 0;
-		this.convertString(jsonValue);
-
-		return new String(characters);
 	}
 
-	private char[] convertValueToChars(Object value) {
-		if (String.class.isInstance(value)) {
-			String string = (String) value;
+	private void writeNumber(Object object) throws IOException {
+		stringWriter.write(object.toString().toCharArray());
 
-			int size = 2;
-			char[] charArray = string.toCharArray();
-			for (int i = 0; i < string.length(); i++) {
-				char character = charArray[i];
-				switch (character) {
-				case '"':
-					size += 2;
-					break;
-				case '\\':
-					size += 2;
-					break;
-				case '\b':
-					size += 2;
-					break;
-				case '\f':
-					size += 2;
-					break;
-				case '\n':
-					size += 2;
-					break;
-				case '\r':
-					size += 2;
-					break;
-				case '\t':
-					size += 2;
-					break;
-				default:
-					size += 1;
+		if (object instanceof Float) {
+			stringWriter.write('F');
+		} else if (object instanceof Double) {
+			stringWriter.write('D');
+		} else if (object instanceof Long) {
+			stringWriter.write('L');
+		} else if (object instanceof Byte) {
+			stringWriter.write('B');
+		}
+	}
+
+	private void writeString(String value) throws IOException {
+		char[] charArray = value.toCharArray();
+		stringWriter.write('\"');
+
+		int last = 0;
+		int length = value.length();
+		for (int i = 0; i < length; i++) {
+			char c = value.charAt(i);
+			char[] replacement;
+			if (c < 128) {
+				replacement = CONST_REPLACEMENT_CHARS[c];
+
+				if (replacement == null) {
+					continue;
 				}
-			}
-
-			char[] stringBuffer = new char[size];
-			int index = 0;
-
-			stringBuffer[index++] = '\"';
-			for (int i = 0; i < string.length(); i++) {
-				char character = charArray[i];
-				switch (character) {
-				case '"':
-					stringBuffer[index++] = '\\';
-					stringBuffer[index++] = '\"';
-					break;
-				case '\\':
-					stringBuffer[index++] = '\\';
-					stringBuffer[index++] = '\\';
-					break;
-				case '\b':
-					stringBuffer[index++] = '\\';
-					stringBuffer[index++] = 'b';
-					break;
-				case '\f':
-					stringBuffer[index++] = '\\';
-					stringBuffer[index++] = 'f';
-					break;
-				case '\n':
-					stringBuffer[index++] = '\\';
-					stringBuffer[index++] = 'n';
-					break;
-				case '\r':
-					stringBuffer[index++] = '\\';
-					stringBuffer[index++] = 'r';
-					break;
-				case '\t':
-					stringBuffer[index++] = '\\';
-					stringBuffer[index++] = 't';
-					break;
-				default:
-					stringBuffer[index++] = character;
-				}
-			}
-			stringBuffer[index++] = '\"';
-
-			return stringBuffer;
-		} else if (value == null) {
-			return NULL_CHARS;
-		} else if (useKson) {
-			if (value instanceof Float) {
-				return (value.toString().concat("F")).toCharArray();
-			} else if (value instanceof Double) {
-				return (value.toString().concat("D")).toCharArray();
-			} else if (value instanceof Long) {
-				return (value.toString().concat("L")).toCharArray();
-			} else if (value instanceof Byte) {
-				return (value.toString().concat("B")).toCharArray();
+			} else if (c == '\u2028') {
+				replacement = CONST_U2028;
+			} else if (c == '\u2029') {
+				replacement = CONST_U2029;
 			} else {
-				return value.toString().toCharArray();
+				continue;
 			}
-		} else {
-			return value.toString().toCharArray();
-		}
-	}
 
-	private int prepareConvert(Object element) {
-		int result = 0;
-
-		if (JsonObject.class.isInstance(element)) {
-			JsonObject jsonObject = (JsonObject) element;
-			int elementLength = jsonObject.size() - 1;
-
-			if (elementLength < 0)
-				elementLength = 0;
-
-			result += 2 + jsonObject.size() + elementLength;
-			for (Object key : jsonObject.keySet()) {
-				Object value = jsonObject.get(key);
-
-				result += prepareConvert(key);
-				result += prepareConvert(value);
+			if (last < i) {
+				stringWriter.write(charArray, last, i - last);
 			}
-		} else if (JsonArray.class.isInstance(element)) {
-			JsonArray jsonArray = (JsonArray) element;
 
-			int elementLength = jsonArray.size() - 1;
-
-			if (elementLength < 0)
-				elementLength = 0;
-
-			result += 2 + elementLength;
-			for (Object object : jsonArray) {
-				result += prepareConvert(object);
-			}
-		} else {
-			char[] makeString = convertValueToChars(element);
-
-			charsStack.push(makeString);
-
-			result += makeString.length;
+			stringWriter.write(replacement);
+			last = i + 1;
 		}
 
-		return result;
-
-	}
-
-	private void convertString(Object element) {
-		if (JsonObject.class.isInstance(element)) {
-			JsonObject jsonObject = (JsonObject) element;
-			boolean firstElement = true;
-
-			characters[charIndex++] = '{';
-			for (Object key : jsonObject.keySet()) {
-				Object value = jsonObject.get(key);
-
-				if (firstElement) {
-					firstElement = false;
-					convertString(key);
-					characters[charIndex++] = ':';
-					convertString(value);
-				} else {
-					characters[charIndex++] = ',';
-					convertString(key);
-					characters[charIndex++] = ':';
-					convertString(value);
-				}
-			}
-			characters[charIndex++] = '}';
-		} else if (JsonArray.class.isInstance(element)) {
-			JsonArray jsonArray = (JsonArray) element;
-			boolean firstElement = true;
-
-			characters[charIndex++] = '[';
-			for (Object object : jsonArray) {
-				if (firstElement) {
-					firstElement = false;
-					convertString(object);
-				} else {
-					characters[charIndex++] = ',';
-					convertString(object);
-				}
-			}
-			characters[charIndex++] = ']';
-		} else {
-			char[] preparedChars = charsStack.shift();
-
-			for (char character : preparedChars) {
-				characters[charIndex++] = character;
-			}
+		if (last < length) {
+			stringWriter.write(charArray, last, length - last);
 		}
+
+		stringWriter.write('\"');
 	}
 }
