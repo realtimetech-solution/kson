@@ -1,9 +1,9 @@
 package com.realtimetech.kson.element;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.realtimetech.kson.annotation.Ignore;
-import com.realtimetech.kson.writer.KsonWriter;
 
 public class JsonArray extends ArrayList<Object> implements JsonValue {
 
@@ -12,22 +12,18 @@ public class JsonArray extends ArrayList<Object> implements JsonValue {
 	 */
 	private static final long serialVersionUID = 5513748119461105760L;
 
-	@Ignore
-	protected KsonWriter ksonWriter = null;
-
 	@Override
-	public String toString(boolean useKsonStandard) {
-		if (ksonWriter == null)
-			this.ksonWriter = new KsonWriter();
-
-		this.ksonWriter.setUseKson(useKsonStandard);
-
-		return this.ksonWriter.toString(this);
+	public String toString(boolean useKsonStandard) throws IOException {
+		return WRITER_POOL.writer().toString(this, useKsonStandard);
 	}
 
 	@Override
 	public String toString() {
-		return toKsonString();
+		try {
+			return toKsonString();
+		} catch (IOException e) {
+			return null;
+		}
 	}
 
 	@Ignore
