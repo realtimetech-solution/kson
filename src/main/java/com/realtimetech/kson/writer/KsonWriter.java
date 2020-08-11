@@ -139,29 +139,26 @@ public class KsonWriter {
 
 		int last = 0;
 		int length = value.length();
+
 		for (int i = 0; i < length; i++) {
 			char c = value.charAt(i);
-			char[] replacement;
+			char[] replacement = null;
 			if (c < 128) {
 				replacement = CONST_REPLACEMENT_CHARS[c];
-
-				if (replacement == null) {
-					continue;
-				}
 			} else if (c == '\u2028') {
 				replacement = CONST_U2028;
 			} else if (c == '\u2029') {
 				replacement = CONST_U2029;
-			} else {
-				continue;
 			}
 
-			if (last < i) {
-				stringWriter.write(charArray, last, i - last);
-			}
+			if(replacement != null){
+				if (last < i) {
+					stringWriter.write(charArray, last, i - last);
+				}
 
-			stringWriter.write(replacement);
-			last = i + 1;
+				stringWriter.write(replacement);
+				last = i + 1;
+			}
 		}
 
 		if (last < length) {
@@ -169,5 +166,6 @@ public class KsonWriter {
 		}
 
 		stringWriter.write('\"');
+
 	}
 }
