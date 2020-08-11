@@ -53,7 +53,7 @@ public class StringWriter {
 	}
 
 	public void write(char[] src, int offset, int length) {
-		int size = length - offset;
+		int size = length;
 		int need = this.currentIndex + size;
 		if (need >= this.currentSize) {
 			raise(need);
