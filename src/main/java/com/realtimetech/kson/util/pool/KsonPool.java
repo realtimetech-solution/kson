@@ -19,6 +19,10 @@ public class KsonPool {
 		this.ksonBuilder = ksonBuilder;
 	}
 
+	public KsonBuilder getKsonBuilder() {
+		return ksonBuilder;
+	}
+
 	public KsonContext get() {
 		synchronized (contextPools) {
 			Thread currentThread = Thread.currentThread();
