@@ -23,6 +23,8 @@ public class TestObject {
 	@Ignore
 	private byte[] bytes;
 
+	private String unicodeString;
+
 	private Test[] testArray;
 
 	private int[] intArray;
@@ -197,6 +199,7 @@ public class TestObject {
 		this.emptyArray = new String[0];
 		this.stringArray = new String[] { "A", "B", "C" };
 		this.string = "ABC";
+		this.unicodeString = "\u0000\u0001\u0302\u0777\u0000";
 
 		this.testInterfaceImpl = new TestInterfaceImpl();
 		this.testAbstractImpl = new TestAbstractImpl();

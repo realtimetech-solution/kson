@@ -881,6 +881,24 @@ public class KsonContext {
                             case '\\':
                                 this.stringMaker.add('\\');
                                 break;
+                            case 'u':
+                                char result = 0;
+                                for(int i = 2; i <= 5; i++){
+                                    char c = charArray[pointer + i];
+                                    result <<= 4;
+                                    if (c >= '0' && c <= '9') {
+                                        result += (c - '0');
+                                    } else if (c >= 'a' && c <= 'f') {
+                                        result += (c - 'a' + 10);
+                                    } else if (c >= 'A' && c <= 'F') {
+                                        result += (c - 'A' + 10);
+                                    } else {
+                                        throw new IOException("An exception occurred at " + (pointer - 1) + " position character(" + charArray[(pointer - 1)] + ")");
+                                    }
+                                }
+                                pointer+=4;
+                                this.stringMaker.add(result);
+                                break;
                             case 'b':
                                 this.stringMaker.add('\b');
                                 break;

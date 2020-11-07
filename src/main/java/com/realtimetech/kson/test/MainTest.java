@@ -124,10 +124,5 @@ public class MainTest {
 
 			System.out.println("Kson : " + ((endTime - startTime)) + "ms");
 		}
-
-		while (true) {
-			Thread.sleep(100000);
-		}
-
 	}
 }
