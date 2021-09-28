@@ -925,7 +925,7 @@ public class KsonContext {
                         this.stringMaker.add(currentChar);
                     }
                 } else if (currentMode == ValueMode.NUMBER) {
-                    if (!(currentChar >= '0' && currentChar <= '9') && currentChar != '-' && currentChar != 'D' && currentChar != 'd' && currentChar != 'F' && currentChar != 'f' && currentChar != 'L' && currentChar != 'l' && currentChar != 'B' && currentChar != 'b' && currentChar != '.') {
+                    if (!(currentChar >= '0' && currentChar <= '9') && currentChar != 'E' && currentChar != 'e' && currentChar != '+'  && currentChar != '-' && currentChar != 'D' && currentChar != 'd' && currentChar != 'F' && currentChar != 'f' && currentChar != 'L' && currentChar != 'l' && currentChar != 'B' && currentChar != 'b' && currentChar != '.') {
                         modeStack.pop();
                         currentMode = modeStack.peek();
 

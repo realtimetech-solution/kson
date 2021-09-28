@@ -18,6 +18,8 @@ public class TestObject {
 	private TestEnum enumType1;
 	private TestEnum enumType2;
 
+	private double floating;
+
 	private String[] emptyArray;
 
 	@Ignore
@@ -195,6 +197,8 @@ public class TestObject {
 
 		this.intArray = new int[] { 1, 2, 3, 4 };
 		this.integer = 1;
+
+		this.floating = 5.136898340781836E-5;
 
 		this.emptyArray = new String[0];
 		this.stringArray = new String[] { "A", "B", "C" };
