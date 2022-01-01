@@ -1,3 +1,5 @@
+# 이 프로젝트는 더 이상 관리되지 않습니다, [opack](https://github.com/realtimetech-solution/opack)를 사용해주세요.
+
 <p align="right">
   <b>Languages</b><br>
   <a href="README_KR.md">Korean</a> |
