@@ -1,3 +1,4 @@
+# This project deprecated, use instead [opack](https://github.com/realtimetech-solution/opack)
 <p align="right">
   <b>Languages</b><br>
   <a href="README_KR.md">Korean</a> |
